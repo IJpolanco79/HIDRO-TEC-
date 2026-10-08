@@ -63,6 +63,7 @@ const translations = {
     authUsername: "Usuario", authPassword: "Contraseña", authConfirmPassword: "Confirma tu contraseña",
     authLogin: "Iniciar sesión", authRegister: "Crear cuenta", authGoRegister: "¿No tienes cuenta? Regístrate",
     authGoLogin: "¿Ya tienes cuenta? Inicia sesión", authLogout: "Cerrar sesión",
+    profileEdit: "Editar perfil", themeToggle: "Cambiar tema", profileTitle: "Tu perfil", profileChoosePhoto: "Elegir foto", profileRemovePhoto: "Quitar foto", profileDisplayName: "Nombre para mostrar", profileTheme: "Apariencia", themeLight: "☀ Claro", themeDark: "☾ Oscuro", themeSystem: "◐ Automático", profileSave: "Guardar", profileCancel: "Cancelar", profileSaved: "Perfil guardado.", profileError: "No se pudo guardar el perfil. Inténtalo de nuevo.", profilePhotoInvalid: "Esa imagen no se pudo usar. Prueba con una foto JPG, PNG o WebP.",
     authPrivacy: "La sesión se recuerda durante 30 días en este equipo. La contraseña se almacena con hash seguro, nunca como texto legible. No hay recuperación automática.",
     authAsideLabel: "DISEÑO HÍBRIDO · DATOS POR CUENTA", authAsideTitle: "Tu cultivo, tus registros.",
     authAsideBody: "Consulta tus lecturas y calibraciones guardadas en una base de datos independiente.",
@@ -279,6 +280,7 @@ const translations = {
     authUsername: "Username", authPassword: "Password", authConfirmPassword: "Confirm password",
     authLogin: "Sign in", authRegister: "Create account", authGoRegister: "New here? Create an account",
     authGoLogin: "Already have an account? Sign in", authLogout: "Sign out",
+    profileEdit: "Edit profile", themeToggle: "Change theme", profileTitle: "Your profile", profileChoosePhoto: "Choose photo", profileRemovePhoto: "Remove photo", profileDisplayName: "Display name", profileTheme: "Appearance", themeLight: "☀ Light", themeDark: "☾ Dark", themeSystem: "◐ Automatic", profileSave: "Save", profileCancel: "Cancel", profileSaved: "Profile saved.", profileError: "The profile could not be saved. Try again.", profilePhotoInvalid: "That image could not be used. Try a JPG, PNG or WebP photo.",
     authPrivacy: "Your session is remembered on this device for 30 days. Your password is stored as a secure hash, never readable text. Password recovery is not available.",
     authAsideLabel: "HYBRID DESIGN · ACCOUNT-SCOPED DATA", authAsideTitle: "Your garden, your records.",
     authAsideBody: "Access your readings and calibration records in a separate database.",
@@ -494,6 +496,7 @@ const translations = {
     authUsername: "Nom d’utilisateur", authPassword: "Mot de passe", authConfirmPassword: "Confirmer le mot de passe",
     authLogin: "Se connecter", authRegister: "Créer un compte", authGoRegister: "Nouveau ? Créer un compte",
     authGoLogin: "Déjà inscrit ? Se connecter", authLogout: "Se déconnecter",
+    profileEdit: "Modifier le profil", themeToggle: "Changer de thème", profileTitle: "Votre profil", profileChoosePhoto: "Choisir une photo", profileRemovePhoto: "Retirer la photo", profileDisplayName: "Nom affiché", profileTheme: "Apparence", themeLight: "☀ Clair", themeDark: "☾ Sombre", themeSystem: "◐ Automatique", profileSave: "Enregistrer", profileCancel: "Annuler", profileSaved: "Profil enregistré.", profileError: "Impossible d’enregistrer le profil. Réessayez.", profilePhotoInvalid: "Cette image n’a pas pu être utilisée. Essayez une photo JPG, PNG ou WebP.",
     authPrivacy: "Votre session est conservée 30 jours sur cet appareil. Le mot de passe est stocké sous forme de hachage sécurisé, jamais en texte lisible. Aucune récupération automatique.",
     authAsideLabel: "DESIGN HYBRIDE · DONNÉES PAR COMPTE", authAsideTitle: "Votre culture, vos données.",
     authAsideBody: "Consultez vos mesures et calibrations dans une base de données distincte.",
@@ -1728,9 +1731,9 @@ function updateAccountInterface() {
   document.querySelector("#logout-button").hidden = !authenticated;
   if (authenticated) {
     document.querySelector("#account-badge-name").textContent = currentAccount.username;
-    document.querySelector("#profile-name").textContent = currentAccount.username;
+    document.querySelector("#profile-name").textContent = currentAccount.displayName || currentAccount.username;
     document.querySelector("#profile-username").textContent = translate("accountSynced");
-    document.querySelector(".avatar").textContent = currentAccount.username[0].toUpperCase();
+    renderAvatar(document.querySelector("#profile-avatar"), currentAccount.avatar, currentAccount.displayName || currentAccount.username);
   }
 }
 
@@ -1748,6 +1751,7 @@ async function loadAccountData() {
 async function openAccount(user, successMessage = "") {
   await loadAccountData();
   currentAccount = user;
+  applyTheme(user.theme || "system");
   setAuthStatus(successMessage);
   updateAccountInterface();
   updateTranslations();
@@ -2226,8 +2230,171 @@ document.addEventListener("click", (event) => {
 
 window.addEventListener("hashchange", () => showRoute(location.hash, { top: true }));
 
+
+function themePreferenceFromStorage() {
+  try { return localStorage.getItem("hidrotec-theme") || "system"; } catch (error) { return "system"; }
+}
+
+// ---------- Perfil y tema ----------
+const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+let themePreference = "system";
+let pendingAvatar = "";
+
+function resolvedTheme(preference) {
+  if (preference === "dark" || preference === "light") return preference;
+  return themeMedia.matches ? "dark" : "light";
+}
+
+function applyTheme(preference) {
+  themePreference = ["light", "dark", "system"].includes(preference) ? preference : "system";
+  const theme = resolvedTheme(themePreference);
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", theme === "dark" ? "#0b1418" : "#f6f7f1");
+  const icon = document.querySelector("#theme-quick-icon");
+  if (icon) icon.textContent = theme === "dark" ? "☀" : "☾";
+  try { localStorage.setItem("hidrotec-theme", themePreference); } catch (error) { /* sin almacenamiento */ }
+}
+
+themeMedia.addEventListener("change", () => {
+  if (themePreference === "system") applyTheme("system");
+});
+
+function renderAvatar(element, avatar, name) {
+  element.replaceChildren();
+  if (avatar) {
+    const image = document.createElement("img");
+    image.src = avatar;
+    image.alt = "";
+    element.append(image);
+  } else {
+    element.textContent = (name || "?")[0].toUpperCase();
+  }
+}
+
+async function saveProfile(profile) {
+  const response = await fetch("/api/account/profile", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(profile)
+  });
+  if (!response.ok) throw new Error("profile_save_failed");
+  const result = await response.json();
+  currentAccount = { ...currentAccount, ...result.user };
+  updateAccountInterface();
+}
+
+function photoToAvatar(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 10 * 1024 * 1024) {
+      reject(new Error("invalid_photo"));
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      const size = 256;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const side = Math.min(image.width, image.height);
+      canvas.getContext("2d").drawImage(image, (image.width - side) / 2, (image.height - side) / 2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("invalid_photo"));
+    };
+    image.src = url;
+  });
+}
+
+const profileDialog = document.querySelector("#profile-dialog");
+
+function openProfileDialog() {
+  pendingAvatar = currentAccount.avatar || "";
+  document.querySelector("#profile-display-name").value = currentAccount.displayName || "";
+  document.querySelector(`#profile-form input[name="theme"][value="${themePreference}"]`).checked = true;
+  document.querySelector("#profile-status").textContent = "";
+  renderAvatar(document.querySelector("#profile-preview"), pendingAvatar, currentAccount.displayName || currentAccount.username);
+  profileDialog.show();
+  document.querySelector("#profile-display-name").focus();
+}
+
+document.querySelector("#profile-open").addEventListener("click", openProfileDialog);
+document.querySelector("#profile-close").addEventListener("click", () => profileDialog.close());
+document.querySelector("#profile-cancel").addEventListener("click", () => {
+  applyTheme(currentAccount.theme || "system");
+  profileDialog.close();
+});
+profileDialog.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  applyTheme(currentAccount.theme || "system");
+  profileDialog.close();
+  document.querySelector("#profile-open").focus();
+});
+
+document.querySelector("#profile-photo").addEventListener("change", async (event) => {
+  const status = document.querySelector("#profile-status");
+  try {
+    pendingAvatar = await photoToAvatar(event.target.files[0]);
+    status.textContent = "";
+    renderAvatar(document.querySelector("#profile-preview"), pendingAvatar, "");
+  } catch (error) {
+    status.textContent = translate("profilePhotoInvalid");
+  }
+  event.target.value = "";
+});
+
+document.querySelector("#profile-photo-remove").addEventListener("click", () => {
+  pendingAvatar = "";
+  const name = document.querySelector("#profile-display-name").value.trim() || currentAccount.username;
+  renderAvatar(document.querySelector("#profile-preview"), "", name);
+});
+
+document.querySelectorAll('#profile-form input[name="theme"]').forEach((input) => {
+  input.addEventListener("change", () => applyTheme(input.value));
+});
+
+document.querySelector("#profile-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const status = document.querySelector("#profile-status");
+  const button = document.querySelector("#profile-save");
+  button.disabled = true;
+  try {
+    await saveProfile({
+      displayName: document.querySelector("#profile-display-name").value.trim(),
+      theme: document.querySelector('#profile-form input[name="theme"]:checked').value,
+      avatar: pendingAvatar
+    });
+    status.textContent = translate("profileSaved");
+    profileDialog.close();
+  } catch (error) {
+    console.error("Could not save the profile.", error.message);
+    status.textContent = translate("profileError");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.querySelector("#theme-quick").addEventListener("click", async () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(next);
+  if (!currentAccount) return;
+  try {
+    await saveProfile({
+      displayName: currentAccount.displayName || "",
+      theme: next,
+      avatar: currentAccount.avatar || ""
+    });
+  } catch (error) {
+    console.error("Could not save the theme.", error.message);
+  }
+});
+
 initializeRegions();
 updateTranslations();
+applyTheme(themePreferenceFromStorage());
 showRoute(location.hash, { top: true });
 checkSupportService();
 restoreAccountSession();
