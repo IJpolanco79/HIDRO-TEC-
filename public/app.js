@@ -2146,10 +2146,6 @@ document.querySelectorAll(".toggle-button").forEach((button) => {
   });
 });
 
-document.querySelector(".notice-close").addEventListener("click", () => {
-  document.querySelector(".demo-notice").remove();
-});
-
 document.querySelector("#guide-previous").addEventListener("click", () => {
   if (activeGuideStep === 0) return;
   activeGuideStep -= 1;
