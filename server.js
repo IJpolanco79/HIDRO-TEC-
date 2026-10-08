@@ -43,9 +43,12 @@ function loadLocalEnvironment() {
 
 loadLocalEnvironment();
 
+const IS_VERCEL = Boolean(process.env.VERCEL);
 const accountDatabasePath = process.env.HIDRO_TEC_DB_PATH
   ? path.resolve(process.env.HIDRO_TEC_DB_PATH)
-  : path.join(ROOT, "data", "hidro-tec-accounts.sqlite");
+  : IS_VERCEL
+    ? path.join("/tmp", "hidro-tec-accounts.sqlite")
+    : path.join(ROOT, "data", "hidro-tec-accounts.sqlite");
 fs.mkdirSync(path.dirname(accountDatabasePath), { recursive: true });
 const accountDatabase = new DatabaseSync(accountDatabasePath);
 accountDatabase.exec(`
@@ -195,7 +198,7 @@ function authCookie(token, request, clear = false) {
     "SameSite=Strict",
     `Max-Age=${clear ? 0 : Math.floor(SESSION_TTL_MS / 1000)}`
   ];
-  if (request.socket.encrypted || process.env.COOKIE_SECURE === "true") parts.push("Secure");
+  if (request.socket.encrypted || request.headers["x-forwarded-proto"] === "https" || process.env.COOKIE_SECURE === "true") parts.push("Secure");
   return parts.join("; ");
 }
 
@@ -717,14 +720,18 @@ const server = http.createServer((request, response) => {
   serveFile(response, requestUrl.pathname);
 });
 
-const host = process.env.HOST || "127.0.0.1";
-const port = Number(process.env.PORT || 3000);
-server.listen(port, host, () => {
-  console.log(`HIDRO TEC is running at http://${host}:${port}`);
-  if (!process.env.GEMINI_API_KEY) console.warn("Gemini support is disabled until GEMINI_API_KEY is configured.");
-});
+if (IS_VERCEL) {
+  module.exports = (request, response) => server.emit("request", request, response);
+} else {
+  const host = process.env.HOST || "127.0.0.1";
+  const port = Number(process.env.PORT || 3000);
+  server.listen(port, host, () => {
+    console.log(`HIDRO TEC is running at http://${host}:${port}`);
+    if (!process.env.GEMINI_API_KEY) console.warn("Gemini support is disabled until GEMINI_API_KEY is configured.");
+  });
 
-server.on("error", (error) => {
-  console.error("Could not start the HIDRO TEC server.", error.message);
-  process.exitCode = 1;
-});
+  server.on("error", (error) => {
+    console.error("Could not start the HIDRO TEC server.", error.message);
+    process.exitCode = 1;
+  });
+}

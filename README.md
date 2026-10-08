@@ -74,3 +74,11 @@ El evaluador solo compara rangos orientativos del catálogo: no detecta plagas, 
 La asignación estatal usa una agrupación geográfica educativa de ocho regiones, como la descrita en [Regiones de México, repositorio de la UAEH](https://dspace.uaeh.edu.mx/server/api/core/bitstreams/22f3ee20-f8c1-4154-91f7-4cd06bb6484a/content); no existe una única clasificación oficial de macroregiones agrícolas o climáticas para todo México. Los límites de otras regionalizaciones varían según el propósito. Para datos locales, consulta [INEGI: climatología](https://www.inegi.org.mx/temas/climatologia/) y [Marco Geoestadístico](https://www.inegi.org.mx/temas/mg/), y para producción por cultivo consulta [SIAP: cierre agrícola](https://nube.agricultura.gob.mx/cierre_agricola/). La región solo ordena sugerencias generales; no predice si un cultivo prosperará en un municipio ni sustituye datos de temperatura, altitud, estación y condiciones del invernadero.
 
 Agrupación del selector: Noroeste (Baja California, Baja California Sur, Sinaloa, Sonora); Noreste (Chihuahua, Coahuila, Durango, Nuevo León, Tamaulipas); Occidente (Colima, Jalisco, Michoacán, Nayarit); Centronorte (Aguascalientes, Guanajuato, Querétaro, San Luis Potosí, Zacatecas); Centrosur (Ciudad de México, Estado de México, Morelos); Oriente (Hidalgo, Puebla, Tlaxcala, Veracruz); Suroeste (Chiapas, Guerrero, Oaxaca); Sureste (Campeche, Quintana Roo, Tabasco, Yucatán).
+
+## Despliegue en Vercel
+
+1. Importa el repositorio en Vercel (sin framework, sin build command).
+2. Define las variables de entorno `GEMINI_API_KEY` (y opcionalmente `GEMINI_MODEL`, `GEMINI_TTS_MODEL`).
+3. Despliega. `vercel.json` redirige todo a `api/index.js`, que reutiliza `server.js`.
+
+Nota: en Vercel el sistema de archivos es efímero; la base SQLite de cuentas se guarda en `/tmp` y se reinicia entre instancias. Para cuentas persistentes hay que migrar a una base externa.
