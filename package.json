@@ -4,7 +4,7 @@
   "private": true,
   "description": "HIDRO TEC hydroponics dashboard with Gemini technical support",
   "scripts": {
-    "start": "node server.js"
+    "start": "node lib/server.js"
   },
   "engines": {
     "node": "22.x"

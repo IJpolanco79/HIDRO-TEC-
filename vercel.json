@@ -1,9 +1,4 @@
 {
-  "rewrites": [{ "source": "/((?!api/ping).*)", "destination": "/api" }],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30,
-      "includeFiles": "{index.html,app.js,styles.css,assets/**}"
-    }
-  }
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }],
+  "functions": { "api/index.js": { "maxDuration": 30 } }
 }

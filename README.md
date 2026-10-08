@@ -79,6 +79,6 @@ Agrupación del selector: Noroeste (Baja California, Baja California Sur, Sinalo
 
 1. Importa el repositorio en Vercel (sin framework, sin build command).
 2. Define las variables de entorno `GEMINI_API_KEY` (y opcionalmente `GEMINI_MODEL`, `GEMINI_TTS_MODEL`).
-3. Despliega. `vercel.json` redirige todo a `api/index.js`, que reutiliza `server.js`.
+3. Despliega. `vercel.json` redirige `/api/*` a `api/index.js`, que reutiliza `lib/server.js`; los archivos estáticos están en `public/`.
 
 Base de datos: las cuentas viven en Supabase (Postgres). Define `DATABASE_URL` con la cadena del *Transaction pooler* (Connect > Transaction pooler, puerto 6543) en `.env` y en las variables de entorno de Vercel. Las tablas `hidro_*` se crean solas al arrancar.
