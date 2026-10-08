@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f7f1" />
+    <meta
+      name="description"
+      content="Panel accesible para planificar y supervisar un sistema hidropónico."
+    />
+    <title>HIDRO TEC — Panel hidropónico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content" data-i18n="skipLink">Saltar al contenido</a>
+    <section id="auth-screen" class="auth-screen" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <img src="assets/hidro-tec-logo.png" alt="" />
+          <span>HIDRO TEC</span>
+          <label class="auth-language-picker">
+            <span class="sr-only" data-i18n="languageLabel">Idioma</span>
+            <select id="auth-language-select" aria-label="Idioma">
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+              <option value="fr">FR</option>
+            </select>
+          </label>
+        </div>
+        <span class="auth-kicker" data-i18n="authKicker">ESPACIO PERSONAL</span>
+        <h1 id="auth-title" data-i18n="authTitle">Bienvenido a tu huerto</h1>
+        <p class="auth-intro" data-i18n="authIntro">Inicia sesión o crea una cuenta para guardar tu historial por separado.</p>
+        <form id="auth-form" class="auth-form">
+          <label><span data-i18n="authUsername">Usuario</span><input id="auth-username" name="username" type="text" minlength="3" maxlength="32" pattern="[A-Za-z0-9_]+" autocomplete="username" required /></label>
+          <label><span data-i18n="authPassword">Contraseña</span><input id="auth-password" name="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required /></label>
+          <label id="auth-confirm-field" hidden><span data-i18n="authConfirmPassword">Confirma tu contraseña</span><input id="auth-confirm-password" name="confirmPassword" type="password" minlength="10" maxlength="128" autocomplete="new-password" /></label>
+          <button id="auth-submit" class="auth-submit" type="submit" data-i18n="authLogin">Iniciar sesión</button>
+          <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+        </form>
+        <button id="auth-mode-switch" class="auth-mode-switch" type="button" data-i18n="authGoRegister">¿No tienes cuenta? Regístrate</button>
+        <p class="auth-privacy" data-i18n="authPrivacy">La sesión se recuerda durante 30 días en este equipo. La contraseña se almacena con hash seguro, nunca como texto legible. No hay recuperación automática.</p>
+      </div>
+      <div class="auth-aside">
+        <span class="auth-aside-label" data-i18n="authAsideLabel">DISEÑO HÍBRIDO · DATOS POR CUENTA</span>
+        <h2 data-i18n="authAsideTitle">Tu cultivo, tus registros.</h2>
+        <p data-i18n="authAsideBody">Consulta tus lecturas y calibraciones guardadas en una base de datos independiente.</p>
+        <span class="auth-aside-mark" aria-hidden="true">H</span>
+      </div>
+    </section>
+    <div id="app-shell" class="app-shell" inert>
+      <aside class="sidebar" aria-label="Navegación principal">
+        <a class="brand" href="#" aria-label="HIDRO TEC, inicio">
+          <img class="brand-logo" src="assets/hidro-tec-logo.png" alt="Logo HIDRO TEC: sistema de raíces flotantes, por Ingenio Pantera (Tec de Chihuahua)" />
+          <span class="brand-name">HIDRO TEC</span>
+        </a>
+
+        <div class="workspace-label" data-i18n="workspace">MI ESPACIO</div>
+        <nav class="main-nav">
+          <a class="nav-link active" href="#overview" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">◫</span>
+            <span data-i18n="navOverview">Resumen</span>
+          </a>
+          <a class="nav-link" href="#starter-guide">
+            <span class="nav-icon" aria-hidden="true">✓</span>
+            <span data-i18n="navGuide">Guía inicial</span>
+          </a>
+          <a class="nav-link" href="#plants">
+            <span class="nav-icon" aria-hidden="true">♧</span>
+            <span data-i18n="navPlants">Mis plantas</span>
+            <span class="nav-count" id="plant-count">06</span>
+          </a>
+          <a class="nav-link" href="#compatibility">
+            <span class="nav-icon" aria-hidden="true">⌘</span>
+            <span data-i18n="navCompatibility">Compañeras</span>
+          </a>
+          <a class="nav-link" href="#hybrid">
+            <span class="nav-icon" aria-hidden="true">⌙</span>
+            <span data-i18n="navHybrid">Sistema híbrido</span>
+          </a>
+          <a class="nav-link" href="#controls">
+            <span class="nav-icon" aria-hidden="true">⌁</span>
+            <span data-i18n="navControls">Controles</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <span class="help-icon" aria-hidden="true">✳</span>
+            <p data-i18n="helpTitle">¿Primera cosecha?</p>
+            <span data-i18n="helpText">Empieza con plantas fáciles de cuidar.</span>
+            <a href="#starter-guide" data-i18n="explorePlants">Ver guía inicial <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="profile">
+            <div class="avatar" aria-hidden="true">A</div>
+            <div class="profile-copy">
+              <strong id="profile-name" data-i18n="profileName">Mi huerto</strong>
+              <span id="profile-username" data-i18n="profilePlan">Espacio personal</span>
+            </div>
+            <button class="icon-button profile-menu" type="button" aria-label="Opciones de perfil">···</button>
+          </div>
+        </div>
+      </aside>
+
+      <main id="main-content" class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb"><span data-i18n="breadcrumbHome">Mi espacio</span><span aria-hidden="true">/</span><strong data-i18n="breadcrumbPage">Resumen</strong></div>
+          <div class="topbar-actions">
+            <span class="connection-pill"><span class="status-dot"></span><span data-i18n="demoMode">Modo demostración</span></span>
+            <span id="account-badge" class="account-badge" hidden><span class="account-badge-dot" aria-hidden="true"></span><span id="account-badge-name"></span></span>
+            <button id="logout-button" class="logout-button" type="button" hidden data-i18n="authLogout">Cerrar sesión</button>
+            <label class="language-picker">
+              <span class="sr-only" data-i18n="languageLabel">Idioma</span>
+              <span class="language-icon" aria-hidden="true">文</span>
+              <select id="language-select" aria-label="Idioma">
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+                <option value="fr">FR</option>
+                <option value="stp" data-i18n="odamOption">O’dam · en preparación</option>
+              </select>
+            </label>
+            <button id="voice-button" class="voice-button" type="button" aria-pressed="false">
+              <span aria-hidden="true">◖))</span><span data-i18n="voice">Escuchar</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="page-content">
+          <div class="voice-settings">
+            <label class="voice-cloud-consent"><input id="voice-cloud-consent" type="checkbox" disabled /><span data-i18n="voiceCloudConsent">Usar voz Gemini para escuchar (envía el texto a Google)</span></label>
+            <span id="voice-status" role="status" aria-live="polite" data-i18n="voiceReady">La voz usa los servicios disponibles en este dispositivo.</span>
+          </div>
+          <div id="language-status" class="language-status" role="status" aria-live="polite" hidden data-i18n="odamPending">
+            La traducción al O’dam y su lectura por voz están en preparación; por ahora el contenido se muestra en español.
+          </div>
+          <section id="overview" class="welcome-row" aria-labelledby="welcome-title">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="todayLabel">MIÉRCOLES, 7 DE OCTUBRE</span></div>
+              <h1 id="welcome-title" data-i18n="welcome">Tu huerto, <span>a tu ritmo.</span></h1>
+              <p class="intro" data-i18n="intro">Todo lo que tus plantas necesitan, en un solo lugar.</p>
+            </div>
+            <button id="read-summary" class="text-action" type="button">
+              <span class="action-sparkle" aria-hidden="true">✳</span><span data-i18n="readSummary">Leer resumen</span><span aria-hidden="true">↗</span>
+            </button>
+          </section>
+
+          <section class="pitch-card" aria-labelledby="pitch-title">
+            <div class="pitch-copy">
+              <span class="pitch-label" data-i18n="pitchLabel">HIDRO TEC · AGRICULTURA HÍBRIDA</span>
+              <h2 id="pitch-title" data-i18n="pitchTitle">Dos métodos. Una arquitectura modular.</h2>
+              <p data-i18n="pitchBody">Integra torres verticales y raíces flotantes en un mismo sistema en L, con monitoreo y riesgos diferenciados por subsistema.</p>
+              <div class="pitch-proof">
+                <span><b aria-hidden="true">01</b><span data-i18n="pitchModuleOne">Torres: flujo y nivel</span></span>
+                <span><b aria-hidden="true">02</b><span data-i18n="pitchModuleTwo">Balsa: oxígeno y aireación</span></span>
+              </div>
+              <div class="pitch-actions">
+                <a class="pitch-primary" href="#hybrid"><span data-i18n="pitchExplore">Explorar arquitectura</span><span aria-hidden="true">↗</span></a>
+                <a class="pitch-secondary" href="#demo-scenarios"><span data-i18n="pitchTry">Probar escenarios</span><span aria-hidden="true">↓</span></a>
+              </div>
+            </div>
+            <div class="pitch-visual">
+              <svg class="hybrid-diagram" viewBox="0 0 360 230" role="img" aria-labelledby="diagram-title diagram-desc">
+                <title id="diagram-title" data-i18n="pitchDiagramTitle">Esquema conceptual del sistema híbrido</title>
+                <desc id="diagram-desc" data-i18n="pitchDiagramDesc">Torres verticales y balsa de raíces flotantes representadas como módulos separados con una solución de diseño en L.</desc>
+                <defs>
+                  <linearGradient id="tank-fill" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#44c1d7" stop-opacity=".8" />
+                    <stop offset="1" stop-color="#087fc7" stop-opacity=".45" />
+                  </linearGradient>
+                  <linearGradient id="tower-fill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#72d8a0" />
+                    <stop offset="1" stop-color="#20a878" />
+                  </linearGradient>
+                </defs>
+                <path class="diagram-flow" d="M72 178V94H236" />
+                <path class="diagram-flow-arrow" d="m230 88 9 6-9 6" />
+                <rect class="diagram-tower" x="51" y="59" width="17" height="121" rx="8" />
+                <rect class="diagram-tower" x="78" y="46" width="17" height="134" rx="8" />
+                <rect class="diagram-tower" x="105" y="66" width="17" height="114" rx="8" />
+                <path class="diagram-leaf" d="M58 61c-17-3-21-16-6-21 10-3 16 5 6 21Zm21-12c-2-17 9-24 17-12 4 8-3 15-17 12Zm31 18c8-14 21-13 21-1 0 9-10 12-21 1Z" />
+                <circle class="diagram-port" cx="59.5" cy="103" r="3" /><circle class="diagram-port" cx="86.5" cy="121" r="3" /><circle class="diagram-port" cx="113.5" cy="103" r="3" />
+                <rect class="diagram-raft" x="177" y="91" width="137" height="89" rx="13" />
+                <path class="diagram-water" d="M188 123h115v43a7 7 0 0 1-7 7h-101a7 7 0 0 1-7-7Z" />
+                <path class="diagram-raft-rail" d="M188 123h115" />
+                <path class="diagram-root" d="M207 109v34m25-34v34m25-34v34m25-34v34" />
+                <path class="diagram-leaf" d="M201 110c-13-9-8-19 2-16 6 2 6 9-2 16Zm24-1c-2-13 8-18 13-9 3 6-2 11-13 9Zm26 0c-1-13 9-18 14-8 3 6-3 11-14 8Zm26 1c-8-11-2-19 7-14 6 4 3 10-7 14Z" />
+                <text class="diagram-label" x="45" y="207" data-i18n="towerTitle">Torres verticales</text>
+                <text class="diagram-label" x="177" y="207" data-i18n="raftTitle">Balsa de raíz flotante</text>
+                <circle class="diagram-node" cx="72" cy="94" r="5" /><circle class="diagram-node" cx="239" cy="94" r="5" />
+              </svg>
+              <span class="diagram-caption" data-i18n="pitchDiagramCaption">ESQUEMA CONCEPTUAL · NO A ESCALA</span>
+            </div>
+          </section>
+
+          <section id="starter-guide" class="starter-guide panel" aria-labelledby="guide-title">
+            <div class="guide-heading">
+              <div>
+                <span class="eyebrow small-eyebrow" data-i18n="guideEyebrow">DE LA SEMILLA A LA PRIMERA COSECHA</span>
+                <h2 id="guide-title" data-i18n="guideTitle">Tu primera siembra, paso a paso</h2>
+                <p data-i18n="guideIntro">Una ruta práctica para empezar con cultivos de hoja y aprender a leer tu sistema sin apresurarte.</p>
+              </div>
+              <span class="guide-badge"><span aria-hidden="true">✳</span><span data-i18n="guideBeginner">NIVEL INICIAL</span></span>
+            </div>
+            <div class="guide-progress-row">
+              <span id="guide-progress-label" data-i18n="guideProgress">Paso 1 de 6</span>
+              <div id="guide-progress-track" class="guide-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Progreso de la guía">
+                <span id="guide-progress-fill"></span>
+              </div>
+              <span id="guide-completed-count" class="guide-completed-count" data-i18n="guideCompleted">0 completados</span>
+            </div>
+            <div id="guide-step-nav" class="guide-step-nav" role="group" aria-label="Pasos de la guía"></div>
+            <article class="guide-step-card" aria-live="polite" aria-atomic="true">
+              <div class="guide-step-number"><span data-i18n="guideStepLabel">PASO</span><strong id="guide-current-number">01</strong></div>
+              <div class="guide-step-content">
+                <h3 id="guide-step-title"></h3>
+                <p id="guide-step-body" class="guide-step-body"></p>
+                <ul id="guide-step-checklist" class="guide-step-checklist"></ul>
+                <div id="guide-step-crops" class="guide-step-crops" hidden></div>
+                <p id="guide-step-tip" class="guide-step-tip"></p>
+              </div>
+            </article>
+            <div class="guide-actions">
+              <button id="guide-previous" class="guide-secondary-button" type="button" data-i18n="guidePrevious">← Anterior</button>
+              <button id="guide-complete" class="guide-complete-button" type="button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="guide-complete-label" data-i18n="guideMarkComplete">Marcar paso como completado</span></button>
+              <button id="guide-next" class="guide-next-button" type="button"><span id="guide-next-label" data-i18n="guideNext">Siguiente paso</span><span aria-hidden="true">→</span></button>
+            </div>
+            <p class="guide-disclaimer" data-i18n="guideDisclaimer">Los tiempos y rangos dependen de variedad, clima, equipo y nutrientes. Prioriza la etiqueta de tus semillas, la solución nutritiva y las instrucciones del fabricante; las lecturas de esta web son demostrativas.</p>
+          </section>
+
+          <div class="demo-notice" role="status">
+            <span class="notice-icon" aria-hidden="true">ⓘ</span>
+            <p><strong data-i18n="demoNoticeTitle">Vista de demostración</strong> <span data-i18n="demoNoticeBody">Los sensores y controles son simulados. Conecta un controlador compatible para operar tu instalación real.</span></p>
+            <button class="notice-close" type="button" aria-label="Cerrar aviso" data-i18n-aria="dismiss">×</button>
+          </div>
+
+          <section class="location-panel" aria-labelledby="location-heading">
+            <div class="location-copy">
+              <strong id="location-heading" data-i18n="locationTitle">Clima local y luz solar</strong>
+              <p data-i18n="locationPrivacy">Al continuar, el navegador pedirá tu ubicación y enviaremos las coordenadas a Open-Meteo para consultar el clima. No las guardamos.</p>
+              <p class="location-limit" data-i18n="locationLimit">La ubicación no mide el pH ni la EC de tu solución, ni la temperatura o luz dentro del cultivo. Para eso se requieren sensores locales.</p>
+              <a class="location-source" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" data-i18n="weatherSource">Fuente meteorológica: Open-Meteo</a>
+            </div>
+            <button id="location-button" class="location-button" type="button" data-i18n="locationAction">Permitir ubicación y consultar clima</button>
+            <p id="location-status" class="location-status" role="status" aria-live="polite" data-i18n="locationStatus">Aún no se ha consultado tu ubicación.</p>
+          </section>
+
+          <section class="metrics-grid hybrid-kpis" aria-label="Indicadores principales del sistema híbrido">
+            <article class="metric-card"><div class="metric-top"><span class="metric-label" data-i18n="metricPH">pH · torres</span><span class="metric-icon icon-lilac" aria-hidden="true">◉</span></div><div class="metric-value"><span id="kpi-ph">—</span> <span class="metric-unit">pH</span></div><div class="metric-foot"><span class="mini-dot blue"></span><span data-i18n="towerTitle">Torres verticales</span></div></article>
+            <article class="metric-card"><div class="metric-top"><span class="metric-label" data-i18n="metricEC">EC · torres</span><span class="metric-icon icon-yellow" aria-hidden="true">✳</span></div><div class="metric-value"><span id="kpi-ec">—</span> <span class="metric-unit">mS/cm</span></div><div class="metric-foot"><span class="mini-dot blue"></span><span data-i18n="demoReading">Lectura de demostración</span></div></article>
+            <article class="metric-card"><div class="metric-top"><span class="metric-label" data-i18n="solutionTemp">Temperatura del agua</span><span class="metric-icon icon-peach" aria-hidden="true">♨</span></div><div class="metric-value"><span id="kpi-water-temp">—</span> <span class="metric-unit">°C</span></div><div class="metric-foot"><span class="mini-dot blue"></span><span data-i18n="demoReading">Lectura de demostración</span></div></article>
+            <article class="metric-card"><div class="metric-top"><span class="metric-label" data-i18n="reservoirLevel">Nivel mínimo</span><span class="metric-icon icon-blue" aria-hidden="true">◌</span></div><div class="metric-value"><span id="kpi-level">—</span> <span class="metric-unit">%</span></div><div class="metric-foot"><span class="mini-dot blue"></span><span data-i18n="bothSystems">Torres + balsa</span></div></article>
+            <article class="metric-card"><div class="metric-top"><span class="metric-label" data-i18n="dissolvedOxygen">Oxígeno · balsa</span><span class="metric-icon icon-peach" aria-hidden="true">≈</span></div><div class="metric-value"><span id="kpi-oxygen">—</span> <span class="metric-unit">mg/L</span></div><div class="metric-foot"><span class="mini-dot blue"></span><span data-i18n="raftTitle">Balsa de raíz flotante</span></div></article>
+          </section>
+          <p class="reference-note kpi-note" data-i18n="kpiDisclaimer">Indicadores editables de demostración; no provienen de sensores conectados.</p>
+
+          <section id="hybrid" class="hybrid-section" aria-labelledby="hybrid-heading">
+            <div class="section-heading hybrid-heading">
+              <div>
+                <div class="eyebrow small-eyebrow" data-i18n="hybridEyebrow">EL DISEÑO QUE NOS DIFERENCIA</div>
+                <h2 id="hybrid-heading" data-i18n="hybridTitle">Sistema híbrido en L</h2>
+                <p class="hybrid-intro" data-i18n="hybridIntro">Supervisa por separado las torres verticales y la balsa de raíz flotante: sus riesgos y necesidades no son iguales.</p>
+              </div>
+              <span class="demo-tag" data-i18n="simulatedTag">SIMULADO</span>
+            </div>
+
+            <section id="demo-scenarios" class="scenario-panel" aria-labelledby="scenario-heading">
+              <div class="scenario-copy">
+                <span class="scenario-kicker" data-i18n="scenarioEyebrow">INTERACCIÓN PARA EVALUACIÓN</span>
+                <h3 id="scenario-heading" data-i18n="scenarioTitle">Prueba una condición del sistema</h3>
+                <p data-i18n="scenarioIntro">Activa un caso simulado y observa cómo cambia el diagnóstico de cada módulo. No modifica hardware.</p>
+              </div>
+              <div class="scenario-options" role="group" aria-label="Escenarios de demostración" data-i18n-aria="scenarioGroup">
+                <button class="scenario-button selected" type="button" data-scenario="stable" aria-pressed="true"><span class="scenario-indicator" aria-hidden="true">✓</span><span data-i18n="scenarioStable">Operación estable</span></button>
+                <button class="scenario-button" type="button" data-scenario="flow" aria-pressed="false"><span class="scenario-indicator" aria-hidden="true">↘</span><span data-i18n="scenarioFlow">Flujo bajo en torres</span></button>
+                <button class="scenario-button" type="button" data-scenario="oxygen" aria-pressed="false"><span class="scenario-indicator" aria-hidden="true">≈</span><span data-i18n="scenarioOxygen">Oxígeno bajo en balsa</span></button>
+              </div>
+              <p id="scenario-feedback" class="scenario-feedback" role="status" aria-live="polite" data-i18n="scenarioStableDetail">Todos los valores de ejemplo están dentro de las referencias mostradas.</p>
+            </section>
+
+            <div class="subsystem-grid">
+              <article class="panel subsystem-card tower-card" aria-labelledby="tower-heading">
+                <div class="subsystem-title">
+                  <div><span class="subsystem-icon" aria-hidden="true">▥</span><h3 id="tower-heading" data-i18n="towerTitle">Torres verticales</h3></div>
+                  <span id="tower-status" class="subsystem-status" role="status">●</span>
+                </div>
+                <p data-i18n="towerFocus">Punto crítico: detectar a tiempo falta de flujo y nivel bajo para proteger las plantas de arriba.</p>
+                <label class="crop-range-select"><span data-i18n="cropAlertRange">Cultivo para ajustar alertas</span><select id="tower-crop" aria-describedby="tower-crop-range-help"></select></label>
+                <div class="subsystem-readings">
+                  <label><span data-i18n="waterPH">pH de solución</span><input data-hybrid-reading="towerPH" type="number" min="0" max="14" step="0.1" value="6.0"><small>pH</small></label>
+                  <label><span data-i18n="nutrientEC">Conductividad EC</span><input data-hybrid-reading="towerEC" type="number" min="0" max="10" step="0.1" value="2.1"><small>mS/cm</small></label>
+                  <label><span data-i18n="solutionTemp">Temperatura de solución</span><input data-hybrid-reading="towerTemp" type="number" min="0" max="40" step="0.1" value="20.5"><small>°C</small></label>
+                  <label><span data-i18n="reservoirLevel">Nivel del depósito</span><input data-hybrid-reading="towerLevel" type="number" min="0" max="100" step="1" value="70"><small>%</small></label>
+                  <label><span data-i18n="flowRate">Flujo de retorno</span><input data-hybrid-reading="towerFlow" type="number" min="0" max="100" step="0.1" value="1.2"><small>L/min</small></label>
+                  <label><span data-i18n="airTemp">Temperatura del aire</span><input data-hybrid-reading="towerAirTemp" type="number" min="0" max="50" step="0.1" value="23"><small>°C</small></label>
+                  <label><span data-i18n="relativeHumidity">Humedad relativa</span><input data-hybrid-reading="towerHumidity" type="number" min="0" max="100" step="1" value="60"><small>%</small></label>
+                  <label><span data-i18n="lightIntensity">Intensidad de luz por zona</span><input data-hybrid-reading="towerLight" type="number" min="0" max="200000" step="10" value="12000"><small>lux</small></label>
+                </div>
+                <p class="crop-range-help" id="tower-crop-range-help"></p>
+                <div class="subsystem-check"><span data-i18n="towerPumpState">Bomba de recirculación</span><button class="subsystem-switch on" type="button" role="switch" aria-checked="true" data-subsystem-switch="towerPump" data-i18n="demoStateOn">Activa · demo</button></div>
+              </article>
+
+              <article class="panel subsystem-card raft-card" aria-labelledby="raft-heading">
+                <div class="subsystem-title">
+                  <div><span class="subsystem-icon" aria-hidden="true">▱</span><h3 id="raft-heading" data-i18n="raftTitle">Balsa de raíz flotante</h3></div>
+                  <span id="raft-status" class="subsystem-status" role="status">●</span>
+                </div>
+                <p data-i18n="raftFocus">Punto crítico: conservar oxígeno disuelto suficiente y verificar la aireación de las raíces.</p>
+                <label class="crop-range-select"><span data-i18n="cropAlertRange">Cultivo para ajustar alertas</span><select id="raft-crop" aria-describedby="raft-crop-range-help"></select></label>
+                <div class="subsystem-readings">
+                  <label><span data-i18n="waterPH">pH de solución</span><input data-hybrid-reading="raftPH" type="number" min="0" max="14" step="0.1" value="6.1"><small>pH</small></label>
+                  <label><span data-i18n="nutrientEC">Conductividad EC</span><input data-hybrid-reading="raftEC" type="number" min="0" max="10" step="0.1" value="1.8"><small>mS/cm</small></label>
+                  <label><span data-i18n="solutionTemp">Temperatura de solución</span><input data-hybrid-reading="raftTemp" type="number" min="0" max="40" step="0.1" value="20"><small>°C</small></label>
+                  <label><span data-i18n="reservoirLevel">Nivel del depósito</span><input data-hybrid-reading="raftLevel" type="number" min="0" max="100" step="1" value="75"><small>%</small></label>
+                  <label><span data-i18n="dissolvedOxygen">Oxígeno disuelto</span><input data-hybrid-reading="raftOxygen" type="number" min="0" max="20" step="0.1" value="6.5"><small>mg/L</small></label>
+                  <label><span data-i18n="airTemp">Temperatura del aire</span><input data-hybrid-reading="raftAirTemp" type="number" min="0" max="50" step="0.1" value="23"><small>°C</small></label>
+                  <label><span data-i18n="relativeHumidity">Humedad relativa</span><input data-hybrid-reading="raftHumidity" type="number" min="0" max="100" step="1" value="60"><small>%</small></label>
+                  <label><span data-i18n="lightIntensity">Intensidad de luz por zona</span><input data-hybrid-reading="raftLight" type="number" min="0" max="200000" step="10" value="12000"><small>lux</small></label>
+                </div>
+                <p class="crop-range-help" id="raft-crop-range-help"></p>
+                <div class="subsystem-check"><span data-i18n="airPumpState">Bomba de aire</span><button class="subsystem-switch on" type="button" role="switch" aria-checked="true" data-subsystem-switch="raftAirPump" data-i18n="demoStateOn">Activa · demo</button></div>
+              </article>
+            </div>
+
+            <div class="hybrid-lower-grid">
+              <section class="panel alert-panel" aria-labelledby="alerts-heading">
+                <div class="section-heading compact-heading">
+                  <div><div class="eyebrow small-eyebrow" data-i18n="alertEyebrow">SUPERVISIÓN LOCAL</div><h3 id="alerts-heading" data-i18n="alertsTitle">Alertas por subsistema</h3></div>
+                  <span class="demo-tag" data-i18n="onScreenOnly">SOLO PANTALLA</span>
+                </div>
+                <p id="alert-summary" class="panel-description" role="status" aria-live="polite"></p>
+                <ul id="subsystem-alerts" class="subsystem-alerts" aria-live="polite"></ul>
+                <button id="support-alerts-button" class="secondary-button support-alert-button" type="button" hidden data-i18n="sendAlertsToSupport">Enviar estos errores a soporte técnico</button>
+                <p class="reference-note" data-i18n="alertLimit">Son avisos orientativos de esta demostración. No llegan al celular o correo; eso requiere conexión y un servicio de notificaciones.</p>
+              </section>
+
+              <section class="panel history-panel" aria-labelledby="history-heading">
+                <div class="section-heading compact-heading">
+                  <div><div class="eyebrow small-eyebrow" data-i18n="historyEyebrow">REGISTRO LOCAL</div><h3 id="history-heading" data-i18n="historyTitle">Historial por subsistema</h3></div>
+                  <span id="history-count" class="demo-tag">0</span>
+                </div>
+                <div class="history-actions"><label class="location-field"><span data-i18n="historyPeriod">Periodo</span><select id="history-period"><option value="day" data-i18n="lastDay">Últimas 24 h</option><option value="week" data-i18n="lastWeek">Últimos 7 días</option><option value="cycle" data-i18n="lastCycle">Ciclo · 90 días</option></select></label><button id="record-readings" class="secondary-button" type="button" data-i18n="saveReading">Guardar lectura</button><button id="export-csv" class="secondary-button" type="button" data-i18n="exportCSV">Exportar CSV</button></div>
+                <div class="history-legend"><span class="legend-tower" data-i18n="towerTitle">Torres verticales</span><span class="legend-raft" data-i18n="raftTitle">Balsa de raíz flotante</span></div>
+                <svg class="history-chart" viewBox="0 0 420 128" role="img" aria-labelledby="history-chart-title history-chart-desc">
+                  <title id="history-chart-title" data-i18n="historyChartTitle">Historial registrado de pH</title>
+                  <desc id="history-chart-desc" data-i18n="historyChartDesc">Gráfica de lecturas que guardaste en este navegador.</desc>
+                  <path class="chart-gridline" d="M34 22H410 M34 58H410 M34 94H410"></path>
+                  <text x="4" y="25">7</text><text x="4" y="61">6</text><text x="4" y="97">5</text>
+                  <path id="history-tower-line" class="chart-tower-line" d=""></path>
+                  <path id="history-raft-line" class="chart-raft-line" d=""></path>
+                  <text id="history-empty" x="112" y="65" data-i18n="historyEmpty">Guarda lecturas para crear el historial</text>
+                </svg>
+                <p id="history-status" class="reference-note" data-i18n="historyLimit">Se guardan lecturas manuales solo en este navegador; los sensores aún no están conectados.</p>
+              </section>
+            </div>
+
+            <section class="panel record-panel" aria-labelledby="record-heading">
+              <div class="section-heading compact-heading"><div><div class="eyebrow small-eyebrow" data-i18n="recordEyebrow">DATOS DEL PROTOTIPO</div><h3 id="record-heading" data-i18n="calibrationTitle">Calibración de sensores</h3></div></div>
+              <form id="calibration-form" class="calibration-form">
+                <label class="location-field"><span data-i18n="subsystem">Subsistema</span><select name="subsystem" required><option value="tower" data-i18n="towerTitle">Torres verticales</option><option value="raft" data-i18n="raftTitle">Balsa de raíz flotante</option></select></label>
+                <label class="location-field"><span data-i18n="sensor">Sensor</span><select name="sensor" required><option value="pH">pH</option><option value="EC">EC</option><option value="temperature" data-i18n="solutionTemp">Temperatura del agua</option><option value="oxygen" data-i18n="dissolvedOxygen">Oxígeno disuelto</option><option value="flow" data-i18n="flowRate">Flujo de retorno</option></select></label>
+                <label class="location-field"><span data-i18n="calibrationDate">Fecha</span><input name="date" type="date" required></label>
+                <label class="location-field"><span data-i18n="responsible">Responsable</span><input name="responsible" type="text" maxlength="80" required></label>
+                <button class="secondary-button" type="submit" data-i18n="saveCalibration">Guardar calibración</button>
+              </form>
+              <p id="calibration-status" class="reference-note" role="status" aria-live="polite" data-i18n="localStorageNote">Los registros quedan en el almacenamiento local de este navegador y se incluyen en el CSV.</p>
+            </section>
+
+            <section class="panel roadmap-panel" aria-labelledby="roadmap-heading">
+              <div class="section-heading compact-heading"><div><div class="eyebrow small-eyebrow" data-i18n="nextPhase">SIGUIENTE FASE</div><h3 id="roadmap-heading" data-i18n="roadmapTitle">Funciones que requieren infraestructura</h3></div><span class="demo-tag" data-i18n="notImplemented">NO IMPLEMENTADO</span></div>
+              <p class="panel-description" data-i18n="roadmapBody">Notificaciones al celular, QR público, control remoto real y detección de plagas con imágenes requieren hosting, backend, controlador conectado y validación con datos; no se simulan como funciones activas.</p>
+            </section>
+
+            <section id="technical-support" class="panel support-panel" aria-labelledby="support-heading">
+              <div class="section-heading compact-heading">
+                <div>
+                  <div class="eyebrow small-eyebrow" data-i18n="supportEyebrow">ASISTENCIA TÉCNICA IA</div>
+                  <h3 id="support-heading" data-i18n="supportTitle">Soporte especializado HIDRO TEC</h3>
+                </div>
+                <span id="support-connection" class="demo-tag" role="status" data-i18n="supportChecking">CONECTANDO…</span>
+              </div>
+              <p class="panel-description" data-i18n="supportIntro">Pregunta sobre hidroponía, cultivos, plagas y enfermedades, calidad del agua, sensores, electrónica, bombas, controles o uso de esta plataforma.</p>
+              <form id="support-form" class="support-form">
+                <label class="support-message-field">
+                  <span data-i18n="supportQuestion">¿Qué problema necesitas resolver?</span>
+                  <textarea id="support-message" rows="3" maxlength="2500" placeholder="Describe qué observas, desde cuándo y qué valores mediste." data-i18n-placeholder="supportPlaceholder"></textarea>
+                </label>
+                <label class="support-image-field">
+                  <span data-i18n="plantPhoto">Foto de la planta (opcional)</span>
+                  <input id="support-image" type="file" accept="image/jpeg,image/png,image/webp" />
+                </label>
+                <p class="support-image-hint" data-i18n="supportImageHint">Para analizar posibles plagas, adjunta una foto nítida de la planta y de cerca de la zona afectada. JPG, PNG o WebP; máximo 5 MB.</p>
+                <label class="support-consent"><input id="support-consent" type="checkbox" aria-required="true" /><span data-i18n="supportConsent">Acepto enviar mi consulta y, si adjunto una foto, esa imagen a Google Gemini para obtener una respuesta. No incluyas datos personales.</span></label>
+                <p id="support-image-name" class="support-image-name" role="status" aria-live="polite" hidden></p>
+                <div class="support-actions">
+                  <button id="support-send" class="secondary-button" type="submit" data-i18n="supportSend">Consultar soporte IA</button>
+                  <button id="support-clear" class="secondary-button secondary-button-quiet" type="button" data-i18n="supportClear">Nueva consulta</button>
+                </div>
+                <p id="support-status" class="support-status" role="status" aria-live="polite" data-i18n="supportDisclaimer">La IA ofrece orientación inicial, no confirma diagnósticos ni reemplaza a un agrónomo, técnico o especialista fitosanitario.</p>
+              </form>
+              <div id="support-messages" class="support-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+            </section>
+
+            <section class="panel comparison-panel" aria-labelledby="comparison-heading">
+              <div class="section-heading comparison-heading">
+                <div><div class="eyebrow small-eyebrow" data-i18n="comparisonEyebrow">EL VALOR DEL DISEÑO HÍBRIDO</div><h3 id="comparison-heading" data-i18n="comparisonTitle">Compara producción y eficiencia</h3></div>
+                <span class="demo-tag" data-i18n="sampleData">DATOS DE EJEMPLO</span>
+              </div>
+              <div class="combined-results" aria-live="polite"><strong data-i18n="combinedSystem">Sistema completo (torres + balsa)</strong><span><span data-i18n="harvestWeight">Cosecha acumulada</span>: <b id="combined-harvest">—</b> kg</span><span><span data-i18n="waterUse">Agua consumida</span>: <b id="combined-water">—</b> L</span><span><span data-i18n="energyUse">Energía consumida</span>: <b id="combined-energy">—</b> kWh</span><span><span data-i18n="systemArea">Área total</span>: <b id="combined-area">—</b> m²</span><span><span data-i18n="systemDensity">Densidad total</span>: <b id="combined-density">—</b> plantas/m²</span><span><span data-i18n="waterPerKg">Agua por kg</span>: <b id="combined-water-per-kg">—</b> L/kg</span><span><span data-i18n="energyPerKg">Energía por kg</span>: <b id="combined-energy-per-kg">—</b> kWh/kg</span><span><span data-i18n="totalInvestment">Inversión de módulos</span>: <b id="combined-cost">—</b> MXN</span><span><span data-i18n="combinedCostPerPlant">Costo de módulo por planta</span>: <b id="combined-cost-per-plant">—</b> MXN</span></div>
+              <p class="panel-description" data-i18n="comparisonIntro">Edita datos de cosecha y consumos para contrastar ambos módulos. Sustituye los ejemplos por mediciones del mismo periodo.</p>
+              <div class="comparison-grid">
+                <article class="comparison-module">
+                  <h4 data-i18n="towerTitle">Torres verticales</h4>
+                  <div class="comparison-inputs">
+                    <label><span data-i18n="growingArea">Área ocupada</span><input data-performance="towerArea" type="number" min="0.1" step="0.1" value="1"><small>m²</small></label>
+                    <label><span data-i18n="plantCount">Plantas</span><input data-performance="towerPlants" type="number" min="1" step="1" value="24"></label>
+                    <label><span data-i18n="harvestWeight">Cosecha acumulada</span><input data-performance="towerHarvest" type="number" min="0" step="0.1" value="3.6"><small>kg</small></label>
+                    <label><span data-i18n="waterUse">Agua consumida</span><input data-performance="towerWater" type="number" min="0" step="0.1" value="42"><small>L</small></label>
+                    <label><span data-i18n="energyUse">Energía consumida</span><input data-performance="towerEnergy" type="number" min="0" step="0.1" value="5.2"><small>kWh</small></label>
+                    <label><span data-i18n="systemCost">Costo del módulo</span><input data-performance="towerCost" type="number" min="0" step="1" value="480"><small>MXN</small></label>
+                  </div>
+                  <dl class="performance-results">
+                    <div><dt data-i18n="density">Densidad</dt><dd data-result="towerDensity"></dd></div>
+                    <div><dt data-i18n="waterPerKg">Agua por kg cosechado</dt><dd data-result="towerWaterPerKg"></dd></div>
+                    <div><dt data-i18n="energyPerKg">Energía por kg cosechado</dt><dd data-result="towerEnergyPerKg"></dd></div>
+                    <div><dt data-i18n="costPerPlant">Costo por planta</dt><dd data-result="towerCostPerPlant"></dd></div>
+                  </dl>
+                </article>
+                <article class="comparison-module">
+                  <h4 data-i18n="raftTitle">Balsa de raíz flotante</h4>
+                  <div class="comparison-inputs">
+                    <label><span data-i18n="growingArea">Área ocupada</span><input data-performance="raftArea" type="number" min="0.1" step="0.1" value="1.5"><small>m²</small></label>
+                    <label><span data-i18n="plantCount">Plantas</span><input data-performance="raftPlants" type="number" min="1" step="1" value="30"></label>
+                    <label><span data-i18n="harvestWeight">Cosecha acumulada</span><input data-performance="raftHarvest" type="number" min="0" step="0.1" value="4.2"><small>kg</small></label>
+                    <label><span data-i18n="waterUse">Agua consumida</span><input data-performance="raftWater" type="number" min="0" step="0.1" value="50"><small>L</small></label>
+                    <label><span data-i18n="energyUse">Energía consumida</span><input data-performance="raftEnergy" type="number" min="0" step="0.1" value="4.1"><small>kWh</small></label>
+                    <label><span data-i18n="systemCost">Costo del módulo</span><input data-performance="raftCost" type="number" min="0" step="1" value="520"><small>MXN</small></label>
+                  </div>
+                  <dl class="performance-results">
+                    <div><dt data-i18n="density">Densidad</dt><dd data-result="raftDensity"></dd></div>
+                    <div><dt data-i18n="waterPerKg">Agua por kg cosechado</dt><dd data-result="raftWaterPerKg"></dd></div>
+                    <div><dt data-i18n="energyPerKg">Energía por kg cosechado</dt><dd data-result="raftEnergyPerKg"></dd></div>
+                    <div><dt data-i18n="costPerPlant">Costo por planta</dt><dd data-result="raftCostPerPlant"></dd></div>
+                  </dl>
+                </article>
+              </div>
+              <p class="reference-note" data-i18n="comparisonLimit">No compares módulos con periodos, cultivos o etapas diferentes. Los cálculos no incluyen todavía mano de obra ni costos operativos.</p>
+            </section>
+          </section>
+
+          <section class="metrics-grid climate-metrics" aria-label="Clima exterior">
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label" data-i18n="metricTemp">Temperatura exterior</span><span class="metric-icon icon-peach" aria-hidden="true">☼</span></div>
+              <div class="metric-value"><span id="metric-air-value">—</span> <span class="metric-unit">°C</span></div>
+              <div class="metric-foot"><span class="mini-dot blue"></span><span id="weather-humidity" data-i18n="noWeatherData">Sin datos meteorológicos</span></div>
+              <div class="metric-line peach"><span style="width: 58%"></span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label" data-i18n="metricLight">Luz solar local</span><span class="metric-icon icon-blue" aria-hidden="true">☼</span></div>
+              <div class="metric-value"><span id="metric-light-value">—</span> <span class="metric-unit" data-i18n="hoursOf">/ día</span></div>
+              <div class="metric-foot"><span class="mini-dot blue"></span><span id="light-status" data-i18n="lightStatus">Consulta tu ubicación</span></div>
+              <div class="metric-line blue"><span style="width: 66%"></span></div>
+            </article>
+          </section>
+
+          <div class="content-grid">
+            <section id="plants" class="panel plants-panel" aria-labelledby="plants-heading">
+              <div class="section-heading">
+                <div>
+                  <div class="eyebrow small-eyebrow" data-i18n="growTogether">CRECEN JUNTAS</div>
+                  <h2 id="plants-heading"><span data-i18n="plantsTitle">Tus plantas</span> <span id="plant-count-heading" class="heading-count">06</span></h2>
+                </div>
+                <a href="#catalog" class="subtle-link" data-i18n="viewAll">Ver catálogo <span aria-hidden="true">↗</span></a>
+              </div>
+              <div class="region-selectors">
+                <label class="location-field">
+                  <span data-i18n="regionLabel">Macroregión geográfica</span>
+                  <select id="region-select" aria-describedby="region-help">
+                    <option value="all" data-i18n="anyRegion">Todo México</option>
+                  </select>
+                </label>
+                <label class="location-field">
+                  <span data-i18n="stateLabel">Estado</span>
+                  <select id="state-select" disabled>
+                    <option value="" data-i18n="selectState">Selecciona primero una región</option>
+                  </select>
+                </label>
+              </div>
+              <p id="region-help" class="region-help" data-i18n="regionHelp">Agrupación geográfica orientativa, no clasificación climática. Cada estado contiene distintos climas y alturas.</p>
+              <div class="plant-filters" role="group" data-i18n-aria="categories" aria-label="Filtrar cultivos">
+                <button class="filter-chip selected" type="button" data-filter="all" data-i18n="filterAll">Todas</button>
+                <button class="filter-chip" type="button" data-filter="leafy" data-i18n="filterLeafy">Hojas</button>
+                <button class="filter-chip" type="button" data-filter="fruit" data-i18n="filterFruit">Frutos</button>
+                <button class="filter-chip" type="button" data-filter="herb" data-i18n="filterHerb">Hierbas</button>
+              </div>
+              <p class="tolerance-note" data-i18n="toleranceNote">pH y EC: objetivo ±0.5. Temperatura y luz son rangos orientativos, no una precisión del sensor.</p>
+              <div id="plant-list" class="plant-grid"></div>
+              <div class="plant-footnote"><span aria-hidden="true">✳</span><span data-i18n="plantFootnote">Valores de referencia: pueden variar según variedad y etapa de crecimiento.</span></div>
+            </section>
+
+            <aside class="right-column">
+              <section id="compatibility" class="panel compatibility-panel" aria-labelledby="compatibility-heading">
+                <div class="section-heading compact-heading">
+                  <div>
+                    <div class="eyebrow small-eyebrow" data-i18n="mixLabel">ANÁLISIS DE CULTIVOS</div>
+                    <h2 id="compatibility-heading" data-i18n="mixTitle">¿Pueden compartir circuito?</h2>
+                  </div>
+                  <span id="selection-count" class="match-badge">0 <span data-i18n="selectedLabel">seleccionados</span></span>
+                </div>
+                <p class="panel-description" data-i18n="mixIntro">Selecciona cultivos del catálogo para comparar sus objetivos y tus lecturas.</p>
+                <div id="selected-plants" class="selected-plants" aria-live="polite">
+                  <p class="empty-selection" data-i18n="emptySelection">Aún no seleccionas cultivos. Activa “Agregar al análisis” en cada planta.</p>
+                </div>
+                <div id="mix-result" class="mix-result" role="status" aria-live="polite"></div>
+                <div id="mix-details" class="mix-details"></div>
+                <div class="cross-contamination">
+                  <strong data-i18n="contaminationTitle">Riesgo por agua compartida</strong>
+                  <p data-i18n="contaminationBody">Un circuito recirculante común puede transportar patógenos de raíz entre plantas. Separar cultivos reduce esa vía, pero no garantiza inocuidad del alimento.</p>
+                  <ul>
+                    <li data-i18n="contaminationAdviceOne">Usa agua potable y evita estiércol o insumos sin tratar.</li>
+                    <li data-i18n="contaminationAdviceTwo">Desinfecta herramientas y superficies; evita salpicaduras entre cultivos.</li>
+                    <li data-i18n="contaminationAdviceThree">Cosecha y manipula alimentos con higiene; lava antes de consumir.</li>
+                  </ul>
+                </div>
+              </section>
+
+              <section id="measurements" class="panel measurements-panel" aria-labelledby="measurements-heading">
+                <div class="section-heading compact-heading">
+                  <div>
+                    <div class="eyebrow small-eyebrow" data-i18n="measureLabel">LO QUE MEDIMOS</div>
+                    <h2 id="measurements-heading" data-i18n="measureTitle">Lecturas del sistema</h2>
+                  </div>
+                  <span class="demo-tag" data-i18n="simulatedTag">SIMULADO</span>
+                </div>
+                <p class="panel-description" data-i18n="measureIntro">Edita las lecturas de ejemplo; el resultado compara estos valores con los cultivos elegidos.</p>
+                <div class="reading-grid">
+                  <label class="reading-field"><span data-i18n="waterPH">pH de solución</span><span><input data-reading="ph" type="number" min="0" max="14" step="0.1" value="6.2" aria-label="pH de solución" /><small>pH</small></span></label>
+                  <label class="reading-field"><span data-i18n="nutrientEC">Conductividad EC</span><span><input data-reading="ec" type="number" min="0" max="10" step="0.1" value="1.8" aria-label="Conductividad EC" /><small>mS/cm</small></span></label>
+                  <label class="reading-field"><span data-i18n="solutionTemp">Temperatura de solución</span><span><input data-reading="waterTemp" type="number" min="0" max="40" step="0.1" value="20" aria-label="Temperatura de solución" /><small>°C</small></span></label>
+                  <label class="reading-field"><span data-i18n="airTemp">Temperatura del aire</span><span><input data-reading="airTemp" type="number" min="0" max="50" step="0.1" value="22.4" aria-label="Temperatura del aire" /><small>°C</small></span></label>
+                  <label class="reading-field"><span data-i18n="relativeHumidity">Humedad relativa</span><span><input data-reading="humidity" type="number" min="0" max="100" step="1" value="60" aria-label="Humedad relativa" /><small>%</small></span></label>
+                  <label class="reading-field"><span data-i18n="lightHours">Fotoperiodo diario</span><span><input data-reading="light" type="number" min="0" max="24" step="0.5" value="12" aria-label="Fotoperiodo diario" /><small>h/día</small></span></label>
+                  <label class="reading-field"><span data-i18n="dissolvedOxygen">Oxígeno disuelto</span><span><input data-reading="oxygen" type="number" min="0" max="20" step="0.1" value="6.5" aria-label="Oxígeno disuelto" /><small>mg/L</small></span></label>
+                  <label class="reading-field"><span data-i18n="reservoirLevel">Nivel del depósito</span><span><input data-reading="level" type="number" min="0" max="100" step="1" value="75" aria-label="Nivel del depósito" /><small>%</small></span></label>
+                </div>
+                <label class="loop-field"><span data-i18n="waterCircuit">Circuito de riego</span>
+                  <select id="loop-type">
+                    <option value="shared" data-i18n="sharedLoop">Solución recirculante compartida</option>
+                    <option value="separate" data-i18n="separateLoops">Circuitos y retornos separados</option>
+                  </select>
+                </label>
+                <p class="measurement-note" data-i18n="measurementNote">pH/EC ±0.5 es la tolerancia de referencia, no la precisión del sensor. Temperatura, humedad y luz son criterios orientativos; la humedad objetivo general (50–70%) no diagnostica enfermedad.</p>
+              </section>
+
+              <section id="controls" class="panel controls-panel" aria-labelledby="controls-heading">
+                <div class="section-heading compact-heading controls-heading">
+                  <div>
+                    <div class="eyebrow small-eyebrow" data-i18n="systemLabel">TU INSTALACIÓN</div>
+                    <h2 id="controls-heading" data-i18n="controlsTitle">Controles</h2>
+                  </div>
+                  <span class="demo-tag" data-i18n="simulatedTag">SIMULADO</span>
+                </div>
+                <div class="control-row">
+                  <div class="control-icon pump-icon" aria-hidden="true">⌁</div>
+                  <div class="control-copy"><strong data-i18n="pump">Bomba de agua</strong><span id="pump-state" data-i18n="stateOn">Activa · ciclo automático</span></div>
+                  <button class="toggle-button on" type="button" role="switch" aria-checked="true" data-control="pump" aria-label="Bomba de agua"><span></span></button>
+                </div>
+                <div class="control-row">
+                  <div class="control-icon light-icon" aria-hidden="true">☼</div>
+                  <div class="control-copy"><strong data-i18n="growLight">Luz de cultivo</strong><span id="light-state" data-i18n="stateOn">Activa · ciclo automático</span></div>
+                  <button class="toggle-button on" type="button" role="switch" aria-checked="true" data-control="light" aria-label="Luz de cultivo"><span></span></button>
+                </div>
+                <div class="control-row">
+                  <div class="control-icon fan-icon" aria-hidden="true">◌</div>
+                  <div class="control-copy"><strong data-i18n="ventilation">Ventilación</strong><span id="fan-state" data-i18n="stateOff">En pausa</span></div>
+                  <button class="toggle-button" type="button" role="switch" aria-checked="false" data-control="fan" aria-label="Ventilación"><span></span></button>
+                </div>
+                <div id="control-feedback" class="control-feedback" role="status" aria-live="polite" data-i18n="controlFeedback">Cambios solo en modo demostración.</div>
+              </section>
+            </aside>
+          </div>
+
+          <footer class="page-footer"><span data-i18n="footer">Cultivar bien empieza por observar.</span><span>HIDRO TEC · <span data-i18n="footerMade">Cultiva a tu manera</span></span></footer>
+        </div>
+      </main>
+    </div>
+    <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

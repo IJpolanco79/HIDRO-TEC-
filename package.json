@@ -1,0 +1,12 @@
+{
+  "name": "hidro-tec-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HIDRO TEC hydroponics dashboard with Gemini technical support",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
