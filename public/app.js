@@ -156,7 +156,7 @@ const translations = {
     waterCircuit: "Circuito de riego", sharedLoop: "Solución recirculante compartida",
     separateLoops: "Circuitos y retornos separados",
     measurementNote: "pH/EC ±0.5 es la tolerancia de referencia, no la precisión del sensor. Temperatura, humedad, oxígeno y luz son criterios orientativos; 50–70% de humedad y >5 mg/L de oxígeno son referencias amplias, no diagnósticos.",
-    navHybrid: "Sistema híbrido", hybridEyebrow: "EL DISEÑO QUE NOS DIFERENCIA", hybridTitle: "Sistema híbrido en L",
+    navHybrid: "Sistema híbrido y controles", navPrototype: "Datos del prototipo", navSupport: "Asistencia técnica", shortcutsAria: "Accesos rápidos", hybridEyebrow: "EL DISEÑO QUE NOS DIFERENCIA", hybridTitle: "Sistema híbrido en L",
     hybridIntro: "Supervisa por separado las torres verticales y la balsa de raíz flotante: sus riesgos y necesidades no son iguales.",
     towerTitle: "Torres verticales", raftTitle: "Balsa de raíz flotante",
     towerFocus: "Punto crítico: detectar a tiempo falta de flujo y nivel bajo para proteger las plantas de arriba.",
@@ -371,7 +371,7 @@ const translations = {
     waterCircuit: "Irrigation circuit", sharedLoop: "Shared recirculating solution",
     separateLoops: "Separate circuits and returns",
     measurementNote: "pH/EC ±0.5 is the reference tolerance, not sensor accuracy. Temperature, humidity, oxygen, and light are guidance; 50–70% humidity and >5 mg/L oxygen are broad references, not diagnoses.",
-    navHybrid: "Hybrid system", hybridEyebrow: "WHAT SETS THIS DESIGN APART", hybridTitle: "L-shaped hybrid system",
+    navHybrid: "Hybrid system & controls", navPrototype: "Prototype data", navSupport: "Technical support", shortcutsAria: "Quick links", hybridEyebrow: "WHAT SETS THIS DESIGN APART", hybridTitle: "L-shaped hybrid system",
     hybridIntro: "Monitor vertical towers and the floating-root raft separately: their risks and needs are different.",
     towerTitle: "Vertical towers", raftTitle: "Floating-root raft",
     towerFocus: "Critical point: catch low flow or low reservoir level early to protect plants at the top.",
@@ -587,7 +587,7 @@ const translations = {
     waterCircuit: "Circuit d’irrigation", sharedLoop: "Solution recirculée partagée",
     separateLoops: "Circuits et retours séparés",
     measurementNote: "pH/EC ±0,5 est la tolérance de référence, pas la précision du capteur. Température, humidité, oxygène et lumière sont indicatifs ; 50–70 % d’humidité et >5 mg/L d’oxygène sont des références générales, pas un diagnostic.",
-    navHybrid: "Système hybride", hybridEyebrow: "LA PARTICULARITÉ DU DESIGN", hybridTitle: "Système hybride en L",
+    navHybrid: "Système hybride et commandes", navPrototype: "Données du prototype", navSupport: "Assistance technique", shortcutsAria: "Accès rapides", hybridEyebrow: "LA PARTICULARITÉ DU DESIGN", hybridTitle: "Système hybride en L",
     hybridIntro: "Surveillez séparément les tours verticales et le radeau à racines flottantes : leurs risques et besoins diffèrent.",
     towerTitle: "Tours verticales", raftTitle: "Radeau à racines flottantes",
     towerFocus: "Point critique : détecter tôt le manque de débit ou un niveau bas pour protéger les plantes en hauteur.",
@@ -860,7 +860,7 @@ function renderStarterGuide() {
         chip.classList.toggle("selected", chip.dataset.filter === activeFilter);
       });
       renderPlants();
-      document.querySelector("#plants").scrollIntoView({ behavior: "smooth", block: "start" });
+      showRoute("#plants");
       const card = [...document.querySelectorAll(".plant-card")].find((item) => item.dataset.plantId === id);
       if (card) card.focus({ preventScroll: true });
     });
@@ -2024,7 +2024,7 @@ document.querySelector("#support-image").addEventListener("change", (event) => {
 
 document.querySelector("#support-alerts-button").addEventListener("click", () => {
   document.querySelector("#support-message").value = measuredSupportContext();
-  document.querySelector("#technical-support").scrollIntoView({ behavior: "smooth" });
+  showRoute("#technical-support", { top: true });
   document.querySelector("#support-message").focus({ preventScroll: true });
 });
 
@@ -2186,17 +2186,52 @@ document.querySelector("#guide-next").addEventListener("click", () => {
   });
 });
 
-document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
-  link.addEventListener("click", () => {
-    document.querySelectorAll(".main-nav .nav-link").forEach((item) => {
-      item.classList.toggle("active", item === link);
-      if (item === link) item.setAttribute("aria-current", "page");
-      else item.removeAttribute("aria-current");
-    });
+function showRoute(hash, { top = false } = {}) {
+  const target = hash && hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+  const view = (target && target.closest(".view")) || document.querySelector("#view-overview");
+  document.querySelectorAll(".view").forEach((item) => {
+    item.hidden = item !== view;
   });
+  let activeKey = "navOverview";
+  document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
+    const linkTarget = document.getElementById(link.getAttribute("href").slice(1));
+    const isActive = Boolean(linkTarget) && linkTarget.closest(".view") === view;
+    link.classList.toggle("active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+      activeKey = link.querySelector("[data-i18n]").dataset.i18n;
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+  const crumb = document.querySelector("#breadcrumb-page");
+  crumb.dataset.i18n = activeKey;
+  crumb.textContent = translate(activeKey);
+  if (top || !target || target === view) window.scrollTo({ top: 0 });
+  else target.scrollIntoView({ block: "start" });
+}
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+  const hash = link.getAttribute("href");
+  if (hash === "#") {
+    event.preventDefault();
+    history.pushState(null, "", location.pathname);
+    showRoute("#overview", { top: true });
+    return;
+  }
+  const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+  if (!target || !target.closest(".view")) return;
+  event.preventDefault();
+  history.pushState(null, "", hash);
+  showRoute(hash, { top: link.classList.contains("nav-link") || link.closest(".overview-shortcuts") !== null });
 });
+
+window.addEventListener("hashchange", () => showRoute(location.hash, { top: true }));
 
 initializeRegions();
 updateTranslations();
+showRoute(location.hash, { top: true });
 checkSupportService();
 restoreAccountSession();

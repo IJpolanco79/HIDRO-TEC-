@@ -648,3 +648,15 @@ h1 span, .eyebrow, .eyebrow-line, .action-sparkle { color: var(--brand-green); }
 @media (prefers-reduced-motion: reduce) {
   .auth-submit, .pitch-primary { transition-duration: .01ms !important; }
 }
+
+/* Vistas separadas */
+.view[hidden] { display: none; }
+.view > * + * { margin-top: 18px; }
+.view > .welcome-row { margin-bottom: 4px; }
+.compat-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; gap: 18px; }
+.overview-shortcuts { display: flex; flex-wrap: wrap; gap: 10px; }
+.overview-shortcuts a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 16px; border: 1px solid #dfeaf0; border-radius: 10px; background: #fff; color: #2b4a58; font-size: 13px; font-weight: 600; text-decoration: none; transition: background .18s, border-color .18s; }
+.overview-shortcuts a:hover { border-color: #b8d8e9; background: #eff6f8; }
+.overview-shortcuts a span[aria-hidden="true"] { color: var(--brand-blue, #087fc7); }
+.view .hybrid-section, .view .climate-metrics, .view .location-panel, .view .starter-guide, .view .pitch-card { margin-bottom: 0; }
+@media (max-width: 1100px) { .compat-grid { grid-template-columns: minmax(0, 1fr); } }
