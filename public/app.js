@@ -5,16 +5,8 @@ const translations = {
     helpText: "Empieza con plantas fáciles de cuidar.", explorePlants: "Ver guía inicial", profileName: "Mi huerto",
     profilePlan: "Espacio personal", breadcrumbHome: "Mi espacio", breadcrumbPage: "Resumen", demoMode: "Modo demostración",
     languageLabel: "Idioma", voice: "Escuchar", todayLabel: "MIÉRCOLES, 7 DE OCTUBRE", welcome: "Tu huerto, <span>a tu ritmo.</span>",
-    voiceCloudConsent: "Usar voz Gemini para escuchar (envía el texto a Google)",
-    voiceReady: "La voz usa los servicios disponibles en este dispositivo.",
-    voiceSpeaking: "Preparando voz…", voiceCompleted: "Lectura finalizada.",
-    voiceCloudRequired: "No hay una voz instalada para este idioma. Activa voz Gemini y vuelve a pulsar Escuchar.",
-    voiceCloudUnavailable: "La voz Gemini no está disponible. Revisa el servidor y la clave GEMINI_API_KEY.",
-    voiceCloudRateLimit: "Se alcanzó el límite temporal de voz. Espera un minuto e inténtalo de nuevo.",
-    voiceCloudError: "No se pudo generar la voz Gemini. Revisa la conexión o inténtalo de nuevo.",
-    voicePlaybackError: "No se pudo reproducir el audio. Revisa la salida de sonido del dispositivo.",
     odamOption: "O’dam · en preparación",
-    odamPending: "La traducción al O’dam (tepehuano del sur) y su lectura por voz están en preparación; por ahora el contenido se muestra en español.",
+    odamPending: "La traducción al O’dam (tepehuano del sur) están en preparación; por ahora el contenido se muestra en español.",
     intro: "Todo lo que tus plantas necesitan, en un solo lugar.", readSummary: "Leer resumen",
     guideEyebrow: "DE LA SEMILLA A LA PRIMERA COSECHA", guideTitle: "Tu primera siembra, paso a paso",
     guideIntro: "Una ruta práctica para empezar con cultivos de hoja y aprender a leer tu sistema sin apresurarte.",
@@ -229,16 +221,8 @@ const translations = {
     helpText: "Start with plants that are easy to care for.", explorePlants: "View starter guide", profileName: "My garden",
     profilePlan: "Personal space", breadcrumbHome: "My space", breadcrumbPage: "Overview", demoMode: "Demo mode",
     languageLabel: "Language", voice: "Listen", todayLabel: "WEDNESDAY, OCTOBER 7", welcome: "Your garden, <span>your pace.</span>",
-    voiceCloudConsent: "Use Gemini voice (text is sent to Google)",
-    voiceReady: "Voice uses services available on this device.",
-    voiceSpeaking: "Preparing voice…", voiceCompleted: "Reading finished.",
-    voiceCloudRequired: "No voice is installed for this language. Enable Gemini voice and press Listen again.",
-    voiceCloudUnavailable: "Gemini voice is unavailable. Check the server and GEMINI_API_KEY.",
-    voiceCloudRateLimit: "The temporary voice request limit was reached. Wait a minute and try again.",
-    voiceCloudError: "Gemini voice could not be generated. Check your connection or try again.",
-    voicePlaybackError: "Audio could not be played. Check this device's sound output.",
     odamOption: "O’dam · in preparation",
-    odamPending: "O’dam (Southern Tepehuan) translation and voice reading are in preparation; content is currently shown in English.",
+    odamPending: "O’dam (Southern Tepehuan) translation are in preparation; content is currently shown in English.",
     intro: "Everything your plants need, all in one place.", readSummary: "Read summary",
     guideEyebrow: "FROM SEED TO FIRST HARVEST", guideTitle: "Your first planting, step by step",
     guideIntro: "A practical path to start with leafy crops and learn to read your system at a steady pace.",
@@ -452,14 +436,6 @@ const translations = {
     helpText: "Commencez avec des plantes faciles à entretenir.", explorePlants: "Voir le guide de départ", profileName: "Mon jardin",
     profilePlan: "Espace personnel", breadcrumbHome: "Mon espace", breadcrumbPage: "Aperçu", demoMode: "Mode démo",
     languageLabel: "Langue", voice: "Écouter", todayLabel: "MERCREDI 7 OCTOBRE", welcome: "Votre jardin, <span>à votre rythme.</span>",
-    voiceCloudConsent: "Utiliser la voix Gemini (le texte est envoyé à Google)",
-    voiceReady: "La voix utilise les services disponibles sur cet appareil.",
-    voiceSpeaking: "Préparation de la voix…", voiceCompleted: "Lecture terminée.",
-    voiceCloudRequired: "Aucune voix n’est installée pour cette langue. Activez la voix Gemini puis appuyez de nouveau sur Écouter.",
-    voiceCloudUnavailable: "La voix Gemini est indisponible. Vérifiez le serveur et GEMINI_API_KEY.",
-    voiceCloudRateLimit: "La limite temporaire de requêtes vocales est atteinte. Attendez une minute et réessayez.",
-    voiceCloudError: "Impossible de générer la voix Gemini. Vérifiez la connexion ou réessayez.",
-    voicePlaybackError: "Impossible de lire l’audio. Vérifiez la sortie sonore de l’appareil.",
     odamOption: "O’dam · en préparation",
     odamPending: "La traduction et la lecture vocale en O’dam (tepehuano du Sud) sont en préparation ; le contenu reste affiché en français.",
     intro: "Tout ce dont vos plantes ont besoin, au même endroit.", readSummary: "Lire le résumé",
@@ -738,7 +714,6 @@ let activeFilter = "all";
 let activeRegion = "all";
 let activeState = "";
 let weatherData = null;
-let speechCloudConfigured = false;
 let activeDemoScenario = "stable";
 let locationState = "idle";
 let locationErrorKey = "";
@@ -746,17 +721,12 @@ let supportConversation = [];
 let supportImage = null;
 let supportServiceState = "checking";
 let supportStatusTranslationKey = "supportChecking";
-let voiceStatusTranslationKey = "voiceReady";
 let currentAccount = null;
 let accountRecords = { readings: [], calibrations: [] };
 let authMode = "login";
 let authStatusTranslationKey = "";
-let voiceAudioContext = null;
 let activeGuideStep = 0;
 const completedGuideSteps = new Set();
-let activeVoiceSource = null;
-let activeVoiceUtterance = null;
-let voiceRequestId = 0;
 const selectedPlantIds = new Set();
 
 const measurementLimits = {
@@ -849,7 +819,6 @@ function renderPlants() {
       renderMixResult();
       const details = `${plant.names[language]} ${selected ? translate("removeFromMix") : translate("addToMix")}. ${translate("pH")} ${formatTarget(plant.ph)}. EC ${formatTarget(plant.ec)} mS/cm.`;
       document.querySelector("#live-region").textContent = details;
-      if (voiceEnabled) speak(details);
     };
     card.addEventListener("click", announcePlant);
     card.addEventListener("keydown", (event) => {
@@ -1336,8 +1305,6 @@ async function checkSupportService() {
     supportServiceState = data.configured ? "ready" : "offline";
     supportStatusTranslationKey = data.configured ? "supportReady" : "supportOffline";
     status.textContent = translate(supportStatusTranslationKey);
-    speechCloudConfigured = Boolean(data.speechConfigured);
-    document.querySelector("#voice-cloud-consent").disabled = !speechCloudConfigured;
     status.classList.toggle("support-online", Boolean(data.configured));
     status.classList.toggle("support-offline", !data.configured);
     return Boolean(data.configured);
@@ -1347,8 +1314,6 @@ async function checkSupportService() {
     supportStatusTranslationKey = "supportUnavailable";
     status.textContent = translate(supportStatusTranslationKey);
     status.classList.add("support-offline");
-    speechCloudConfigured = false;
-    document.querySelector("#voice-cloud-consent").disabled = true;
     return false;
   }
 }
@@ -1909,7 +1874,6 @@ function updateTranslations() {
     else element.textContent = value;
   });
   document.querySelector("#support-connection").textContent = translate(supportStatusTranslationKey);
-  document.querySelector("#voice-status").textContent = translate(voiceStatusTranslationKey);
   document.querySelector("#auth-status").textContent = authStatusTranslationKey ? translate(authStatusTranslationKey) : "";
   document.querySelector("#scenario-feedback").textContent = translate(activeDemoScenario
     ? { stable: "scenarioStableDetail", flow: "scenarioFlowDetail", oxygen: "scenarioOxygenDetail" }[activeDemoScenario]
@@ -1957,154 +1921,6 @@ function updateTranslations() {
   renderPerformanceComparison();
   renderHistory();
   updateAccountInterface();
-}
-
-function setVoiceStatus(key) {
-  voiceStatusTranslationKey = key;
-  document.querySelector("#voice-status").textContent = translate(key);
-  document.querySelector("#live-region").textContent = translate(key);
-}
-
-function finishVoicePlayback() {
-  document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-  activeVoiceSource = null;
-  activeVoiceUtterance = null;
-  setVoiceStatus("voiceCompleted");
-}
-
-function stopVoicePlayback() {
-  voiceRequestId += 1;
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-  if (activeVoiceSource) {
-    activeVoiceSource.onended = null;
-    activeVoiceSource.stop();
-  }
-  activeVoiceSource = null;
-  activeVoiceUtterance = null;
-  document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-  setVoiceStatus("voiceOff");
-}
-
-function findDeviceVoice(locale) {
-  const voices = window.speechSynthesis.getVoices();
-  const languageTag = locale.toLowerCase();
-  const languageCode = languageTag.split("-")[0];
-  return voices.find((voice) => voice.lang.toLowerCase() === languageTag)
-    || voices.find((voice) => voice.lang.toLowerCase().startsWith(`${languageCode}-`))
-    || voices.find((voice) => voice.lang.toLowerCase() === languageCode);
-}
-
-function waitForDeviceVoices(timeout = 700) {
-  if (!("speechSynthesis" in window)) return Promise.resolve([]);
-  const current = window.speechSynthesis.getVoices();
-  if (current.length) return Promise.resolve(current);
-  return new Promise((resolve) => {
-    let completed = false;
-    const finish = () => {
-      if (completed) return;
-      completed = true;
-      clearTimeout(timer);
-      window.speechSynthesis.removeEventListener("voiceschanged", finish);
-      resolve(window.speechSynthesis.getVoices());
-    };
-    const timer = setTimeout(finish, timeout);
-    window.speechSynthesis.addEventListener("voiceschanged", finish);
-    window.speechSynthesis.getVoices();
-  });
-}
-
-async function speakWithGemini(text, locale, requestId) {
-  if (!voiceAudioContext) {
-    voiceAudioContext = new AudioContext();
-  }
-  await voiceAudioContext.resume();
-  const response = await fetch("/api/speech", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ text, language: locale })
-  });
-  let result;
-  try {
-    result = await response.json();
-  } catch {
-    throw new Error("speech_unavailable");
-  }
-  if (!response.ok) throw new Error(result.error || "speech_unavailable");
-  if (result.mimeType !== "audio/wav" || typeof result.data !== "string") {
-    throw new Error("invalid_speech_response");
-  }
-  if (requestId !== voiceRequestId) return;
-  const binary = atob(result.data);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-  let audioBuffer;
-  try {
-    audioBuffer = await voiceAudioContext.decodeAudioData(bytes.buffer);
-  } catch {
-    throw new Error("speech_playback_error");
-  }
-  if (requestId !== voiceRequestId) return;
-  const source = voiceAudioContext.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(voiceAudioContext.destination);
-  source.onended = finishVoicePlayback;
-  activeVoiceSource = source;
-  source.start();
-}
-
-async function speak(text) {
-  const requestId = ++voiceRequestId;
-  const locale = { es: "es-MX", en: "en-US", fr: "fr-FR" }[language];
-  const useGemini = document.querySelector("#voice-cloud-consent").checked;
-  document.querySelector("#voice-button").setAttribute("aria-pressed", "true");
-  setVoiceStatus("voiceSpeaking");
-
-  if (useGemini) {
-    try {
-      await speakWithGemini(text, locale, requestId);
-      return;
-    } catch (error) {
-      console.error("Gemini speech generation failed.", error.message);
-      if (requestId !== voiceRequestId) return;
-      document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-      const errorKey = error.message === "ai_not_configured"
-        ? "voiceCloudUnavailable"
-        : error.message === "rate_limited"
-          ? "voiceCloudRateLimit"
-          : error.message === "speech_playback_error"
-            ? "voicePlaybackError"
-            : "voiceCloudError";
-      setVoiceStatus(errorKey);
-      return;
-    }
-  }
-
-  if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
-    document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-    setVoiceStatus("speechUnavailable");
-    return;
-  }
-  await waitForDeviceVoices();
-  if (requestId !== voiceRequestId) return;
-  const voice = findDeviceVoice(locale);
-  if (!voice) {
-    document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-    setVoiceStatus(speechCloudConfigured ? "voiceCloudRequired" : "voiceCloudUnavailable");
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voice;
-  utterance.lang = voice.lang || locale;
-  utterance.rate = 0.92;
-  utterance.onend = finishVoicePlayback;
-  utterance.onerror = (event) => {
-    if (event.error === "canceled" || event.error === "interrupted") return;
-    document.querySelector("#voice-button").setAttribute("aria-pressed", "false");
-    setVoiceStatus("speechUnavailable");
-  };
-  activeVoiceUtterance = utterance;
-  window.speechSynthesis.speak(utterance);
 }
 
 document.querySelector("#language-select").addEventListener("change", (event) => {
@@ -2328,21 +2144,6 @@ document.querySelectorAll(".toggle-button").forEach((button) => {
     document.querySelector("#control-feedback").textContent = translate("controlFeedback");
     document.querySelector("#live-region").textContent = `${button.getAttribute("aria-label")}: ${isOn ? translate("controlOn") : translate("controlOff")}`;
   });
-});
-
-document.querySelector("#voice-button").addEventListener("click", (event) => {
-  if (event.currentTarget.getAttribute("aria-pressed") === "true") {
-    stopVoicePlayback();
-  } else {
-    const readings = currentReadings();
-    const text = `${translate("summaryAnnouncement")} ${translate("metricPH")}: ${readings.ph}, ${translate("metricEC")}: ${readings.ec}, ${translate("airTemp")}: ${readings.airTemp} degrees Celsius. ${plants.length} ${translate("navPlants")}.`;
-    speak(text);
-  }
-});
-
-document.querySelector("#read-summary").addEventListener("click", () => {
-  const readings = currentReadings();
-  speak(`${translate("summaryAnnouncement")} ${translate("metricPH")}: ${readings.ph}, ${translate("metricEC")}: ${readings.ec} millisiemens per centimeter. ${translate("airTemp")}: ${readings.airTemp} degrees Celsius. ${plants.length} ${translate("navPlants")}.`);
 });
 
 document.querySelector(".notice-close").addEventListener("click", () => {

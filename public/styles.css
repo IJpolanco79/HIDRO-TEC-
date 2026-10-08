@@ -86,8 +86,6 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
 .language-picker { display: flex; align-items: center; gap: 5px; color: #68756b; }
 .language-icon { font-size: 16px; }
 .language-picker select { border: 0; background: transparent; color: #566359; font-size: 11px; font-weight: 700; cursor: pointer; }
-.voice-button { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid #e7ece5; border-radius: 8px; background: #fff; color: #526354; font-size: 11px; font-weight: 600; cursor: pointer; }
-.voice-button:hover, .voice-button[aria-pressed="true"] { border-color: #c9dccb; background: #f2f7f0; color: var(--green-dark); }
 
 .page-content { max-width: 1410px; margin: 0 auto; padding: 32px 43px 20px; }
 .pitch-card { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(310px, .95fr); align-items: center; gap: 22px; min-height: 260px; margin: 0 0 20px; padding: 27px 30px; overflow: hidden; border: 1px solid #164866; border-radius: 16px; background: radial-gradient(ellipse at 84% 15%, rgba(47, 173, 194, .26), transparent 36%), linear-gradient(120deg, #082b41, #0a4560 65%, #0b5267); color: #f4fbff; box-shadow: 0 14px 34px rgba(8, 48, 68, .13); }
@@ -119,13 +117,6 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
 .diagram-node { fill: #78d9bd; stroke: #c2f6e7; stroke-width: 2; }
 .diagram-caption { position: absolute; right: 11px; bottom: 8px; color: #a8cbd2; font-size: 7px; letter-spacing: .8px; }
 @keyframes flow-dash { to { stroke-dashoffset: -24; } }
-.voice-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 16px; padding: 9px 12px; border: 1px solid #dfeaf0; border-radius: 8px; background: #f8fcfd; color: #71828a; font-size: 9px; line-height: 1.5; }
-.voice-cloud-consent { display: inline-flex; align-items: center; gap: 7px; color: #506a77; cursor: pointer; }
-.voice-cloud-consent input { accent-color: var(--brand-blue, #087fc7); }
-.voice-cloud-consent input:disabled { cursor: not-allowed; }
-.voice-cloud-consent:has(input:disabled) { cursor: not-allowed; opacity: .65; }
-#voice-status { min-width: 0; }
-#voice-status:empty { display: none; }
 .language-status { margin-bottom: 16px; padding: 11px 13px; border: 1px solid #e8eddf; border-radius: 8px; background: #f1f5e9; color: #657257; font-size: 10px; line-height: 1.5; }
 .language-status[hidden] { display: none; }
 .welcome-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; }
@@ -487,8 +478,6 @@ h2 { margin: 0; font: 700 17px "Manrope", sans-serif; letter-spacing: -.35px; }
   .connection-pill { padding: 6px 7px; font-size: 0; }
   .connection-pill .status-dot { width: 8px; height: 8px; }
   .language-icon { display: none; }
-  .voice-button { padding: 7px 8px; font-size: 0; }
-  .voice-button > span:first-child { font-size: 12px; }
   .page-content { padding: 22px 13px; }
   .pitch-card { grid-template-columns: minmax(0, 1fr); gap: 17px; margin-bottom: 16px; padding: 20px 17px 15px; }
   .pitch-card h2 { font-size: 24px; }
@@ -559,7 +548,6 @@ h1 span, .eyebrow, .eyebrow-line, .action-sparkle { color: var(--brand-green); }
 .nav-link:hover { background: #eff6f8; }
 .help-icon { background: var(--brand-green-soft); color: var(--brand-green); }
 .help-card a, .subtle-link, .text-action, .location-source { color: var(--brand-blue-dark); }
-.voice-button:hover, .voice-button[aria-pressed="true"] { border-color: #b8d8e9; background: var(--brand-blue-soft); color: var(--brand-blue-dark); }
 .demo-notice, .language-status { border-color: #cce3ef; background: #edf7fb; color: #405c6b; }
 .demo-notice strong, .notice-icon { color: var(--brand-blue-dark); }
 .location-panel { border-color: #d6e8ef; background: #f8fcfd; }

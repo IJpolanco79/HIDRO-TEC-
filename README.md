@@ -33,8 +33,7 @@ En la primera visita, selecciona **Crear cuenta** y registra un usuario (3–32 
 - Advertencia fitosanitaria separada del resultado agronómico: el agua recirculante común puede transportar patógenos entre raíces; aislar retornos reduce esa vía, pero no garantiza la inocuidad del alimento. Incluye recordatorios de agua potable, limpieza y manejo higiénico.
 - Filtros por tipo de cultivo y selección con teclado o ratón.
 - Consejos orientativos para combinar cultivos.
-- Interfaz en español, inglés y francés. O’dam (tepehuano del sur) aparece en el selector como idioma en preparación; sus traducciones y lectura por voz requieren revisión de una persona hablante antes de publicarse.
-- Lectura por voz mediante la síntesis de voz del navegador; las voces disponibles dependen del dispositivo.
+- Interfaz en español, inglés y francés. O’dam (tepehuano del sur) aparece en el selector como idioma en preparación; sus traducciones requieren revisión de una persona hablante antes de publicarse.
 - Interruptores interactivos de bomba, luz y ventilación.
 - Registro e inicio de sesión con usuarios separados y sesiones persistentes. La base de datos SQLite (`data/hidro-tec-accounts.sqlite`) guarda nombres de usuario, hashes scrypt de las contraseñas, sesiones y registros asociados a cada cuenta; nunca almacena contraseñas en texto legible. La carpeta de datos está excluida del control de versiones.
 
@@ -53,7 +52,6 @@ El texto y las imágenes se envían a Google Gemini sólo después de marcar el 
 
 La IA puede equivocarse al interpretar fotografías, plagas, enfermedades y parámetros. No aplica tratamientos, no controla el equipo, no llama a soporte humano y no reemplaza la inspección de una persona técnica/agronómica. Para una falla crítica o un diagnóstico fitosanitario, contacta al especialista local.
 
-El botón **Escuchar** usa primero la voz instalada en el dispositivo para el idioma elegido. Si no hay una, habilita “Usar voz Gemini” y vuelve a pulsarlo: el texto se enviará a Google para generar audio en español (voz Kore), inglés (Aoede) o francés (Sulafat). La voz Gemini requiere el backend y la misma `GEMINI_API_KEY`; consume cuota del proveedor. Sin consentimiento usa solo voces locales y no envía el texto. O’dam aún no tiene traducción ni voz configurada. La generación en la nube tiene un límite de solicitudes y duración por petición.
 
 ## Cuentas y datos
 
@@ -78,7 +76,7 @@ Agrupación del selector: Noroeste (Baja California, Baja California Sur, Sinalo
 ## Despliegue en Vercel
 
 1. Importa el repositorio en Vercel (sin framework, sin build command).
-2. Define las variables de entorno `GEMINI_API_KEY` (y opcionalmente `GEMINI_MODEL`, `GEMINI_TTS_MODEL`).
+2. Define las variables de entorno `GEMINI_API_KEY` (y opcionalmente `GEMINI_MODEL`).
 3. Despliega. `vercel.json` redirige `/api/*` a `api/index.js`, que reutiliza `lib/server.js`; los archivos estáticos están en `public/`.
 
 Base de datos: las cuentas viven en Supabase (Postgres). Define `DATABASE_URL` con la cadena del *Transaction pooler* (Connect > Transaction pooler, puerto 6543) en `.env` y en las variables de entorno de Vercel. Las tablas `hidro_*` se crean solas al arrancar.
