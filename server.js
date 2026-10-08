@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { promisify } = require("node:util");
-const { DatabaseSync } = require("node:sqlite");
+const { Pool } = require("pg");
 
 const ROOT = __dirname;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -44,36 +44,46 @@ function loadLocalEnvironment() {
 loadLocalEnvironment();
 
 const IS_VERCEL = Boolean(process.env.VERCEL);
-const accountDatabasePath = process.env.HIDRO_TEC_DB_PATH
-  ? path.resolve(process.env.HIDRO_TEC_DB_PATH)
-  : IS_VERCEL
-    ? path.join("/tmp", "hidro-tec-accounts.sqlite")
-    : path.join(ROOT, "data", "hidro-tec-accounts.sqlite");
-fs.mkdirSync(path.dirname(accountDatabasePath), { recursive: true });
-const accountDatabase = new DatabaseSync(accountDatabasePath);
-accountDatabase.exec(`
-  PRAGMA foreign_keys = ON;
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    username TEXT NOT NULL COLLATE NOCASE UNIQUE,
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL is required (Supabase Postgres connection string).");
+}
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  max: IS_VERCEL ? 3 : 10
+});
+db.on("error", (error) => console.error("Postgres pool error.", error.message));
+const databaseReady = db.query(`
+  CREATE TABLE IF NOT EXISTS hidro_users (
+    id BIGSERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
     password_salt TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
-  CREATE TABLE IF NOT EXISTS sessions (
+  CREATE TABLE IF NOT EXISTS hidro_sessions (
     token_hash TEXT PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    expires_at INTEGER NOT NULL
+    user_id BIGINT NOT NULL REFERENCES hidro_users(id) ON DELETE CASCADE,
+    expires_at BIGINT NOT NULL
   );
-  CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions(expires_at);
-  CREATE TABLE IF NOT EXISTS account_data (
-    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  CREATE INDEX IF NOT EXISTS hidro_sessions_expiry_idx ON hidro_sessions(expires_at);
+  CREATE TABLE IF NOT EXISTS hidro_account_data (
+    user_id BIGINT PRIMARY KEY REFERENCES hidro_users(id) ON DELETE CASCADE,
     readings_json TEXT NOT NULL DEFAULT '[]',
     calibrations_json TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL
   );
-`);
-accountDatabase.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(Date.now());
+  ALTER TABLE hidro_users ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE hidro_sessions ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE hidro_account_data ENABLE ROW LEVEL SECURITY;
+`).then(() => db.query("DELETE FROM hidro_sessions WHERE expires_at <= $1", [Date.now()]))
+  .catch((error) => { console.error("Could not initialise the database.", error.message); throw error; });
+databaseReady.catch(() => {});
+
+async function query(text, params) {
+  await databaseReady;
+  return db.query(text, params);
+}
 
 const supportInstructions = [
   "Eres el asistente técnico de HIDRO TEC, especializado en hidroponía y este prototipo híbrido en L (torres verticales y balsa de raíces flotantes).",
@@ -224,26 +234,26 @@ async function passwordHash(password, salt) {
   });
 }
 
-function getAuthenticatedUser(request) {
+async function getAuthenticatedUser(request) {
   const tokenHash = sessionTokenHash(request);
   if (!tokenHash) return null;
-  const session = accountDatabase.prepare(`
-    SELECT users.id, users.username, sessions.expires_at
-    FROM sessions JOIN users ON users.id = sessions.user_id
-    WHERE sessions.token_hash = ?
-  `).get(tokenHash);
-  if (!session || session.expires_at <= Date.now()) {
-    if (session) accountDatabase.prepare("DELETE FROM sessions WHERE token_hash = ?").run(tokenHash);
+  const session = (await query(`
+    SELECT hidro_users.id, hidro_users.username, hidro_sessions.expires_at
+    FROM hidro_sessions JOIN hidro_users ON hidro_users.id = hidro_sessions.user_id
+    WHERE hidro_sessions.token_hash = $1
+  `, [tokenHash])).rows[0];
+  if (!session || Number(session.expires_at) <= Date.now()) {
+    if (session) await query("DELETE FROM hidro_sessions WHERE token_hash = $1", [tokenHash]);
     return null;
   }
   return { id: Number(session.id), username: session.username };
 }
 
-function setAuthenticatedSession(userId, request) {
+async function setAuthenticatedSession(userId, request) {
   const token = crypto.randomBytes(32).toString("base64url");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  accountDatabase.prepare("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)")
-    .run(tokenHash, userId, Date.now() + SESSION_TTL_MS);
+  await query("INSERT INTO hidro_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)",
+    [tokenHash, userId, Date.now() + SESSION_TTL_MS]);
   return authCookie(token, request);
 }
 
@@ -271,7 +281,7 @@ function validateAccountData(body) {
 
 async function handleAuth(request, response, pathname) {
   if (request.method === "GET" && pathname === "/api/auth/session") {
-    const user = getAuthenticatedUser(request);
+    const user = await getAuthenticatedUser(request);
     respond(response, 200, { authenticated: Boolean(user), user });
     return;
   }
@@ -309,7 +319,7 @@ async function handleAuth(request, response, pathname) {
 
   if (pathname === "/api/auth/logout") {
     const tokenHash = sessionTokenHash(request);
-    if (tokenHash) accountDatabase.prepare("DELETE FROM sessions WHERE token_hash = ?").run(tokenHash);
+    if (tokenHash) await query("DELETE FROM hidro_sessions WHERE token_hash = $1", [tokenHash]);
     respond(response, 200, { ok: true }, { "set-cookie": authCookie("", request, true) });
     return;
   }
@@ -320,7 +330,7 @@ async function handleAuth(request, response, pathname) {
       response.end();
       return;
     }
-    const user = getAuthenticatedUser(request);
+    const user = await getAuthenticatedUser(request);
     if (!user) {
       respond(response, 401, { error: "authentication_required" });
       return;
@@ -329,14 +339,14 @@ async function handleAuth(request, response, pathname) {
       respond(response, 400, { error: "invalid_account_data" });
       return;
     }
-    accountDatabase.prepare(`
-      INSERT INTO account_data (user_id, readings_json, calibrations_json, updated_at)
-      VALUES (?, ?, ?, ?)
+    await query(`
+      INSERT INTO hidro_account_data (user_id, readings_json, calibrations_json, updated_at)
+      VALUES ($1, $2, $3, $4)
       ON CONFLICT(user_id) DO UPDATE SET
         readings_json = excluded.readings_json,
         calibrations_json = excluded.calibrations_json,
         updated_at = excluded.updated_at
-    `).run(user.id, JSON.stringify(body.readings), JSON.stringify(body.calibrations), new Date().toISOString());
+    `, [user.id, JSON.stringify(body.readings), JSON.stringify(body.calibrations), new Date().toISOString()]);
     respond(response, 200, { ok: true });
     return;
   }
@@ -362,20 +372,20 @@ async function handleAuth(request, response, pathname) {
     const salt = crypto.randomBytes(16);
     const hash = await passwordHash(password, salt);
     try {
-      const result = accountDatabase.prepare(`
-        INSERT INTO users (username, password_salt, password_hash, created_at)
-        VALUES (?, ?, ?, ?)
-      `).run(username, salt.toString("hex"), hash.toString("hex"), new Date().toISOString());
-      const userId = Number(result.lastInsertRowid);
-      accountDatabase.prepare(`
-        INSERT INTO account_data (user_id, readings_json, calibrations_json, updated_at)
-        VALUES (?, '[]', '[]', ?)
-      `).run(userId, new Date().toISOString());
+      const result = await query(`
+        INSERT INTO hidro_users (username, password_salt, password_hash, created_at)
+        VALUES ($1, $2, $3, $4) RETURNING id
+      `, [username, salt.toString("hex"), hash.toString("hex"), new Date().toISOString()]);
+      const userId = Number(result.rows[0].id);
+      await query(`
+        INSERT INTO hidro_account_data (user_id, readings_json, calibrations_json, updated_at)
+        VALUES ($1, '[]', '[]', $2)
+      `, [userId, new Date().toISOString()]);
       respond(response, 201, { user: { id: userId, username } }, {
-        "set-cookie": setAuthenticatedSession(userId, request)
+        "set-cookie": await setAuthenticatedSession(userId, request)
       });
     } catch (error) {
-      if (error.code === "ERR_SQLITE_ERROR" && /UNIQUE constraint failed/i.test(error.message)) {
+      if (error.code === "23505") {
         respond(response, 409, { error: "username_unavailable" });
         return;
       }
@@ -384,9 +394,9 @@ async function handleAuth(request, response, pathname) {
     return;
   }
 
-  const user = accountDatabase.prepare(`
-    SELECT id, username, password_salt, password_hash FROM users WHERE username = ? COLLATE NOCASE
-  `).get(username);
+  const user = (await query(`
+    SELECT id, username, password_salt, password_hash FROM hidro_users WHERE username = $1
+  `, [username])).rows[0];
   const salt = user ? Buffer.from(user.password_salt, "hex") : Buffer.alloc(16);
   const expectedHash = user ? Buffer.from(user.password_hash, "hex") : Buffer.alloc(64);
   const actualHash = await passwordHash(password, salt);
@@ -398,24 +408,24 @@ async function handleAuth(request, response, pathname) {
   }
   const userId = Number(user.id);
   respond(response, 200, { user: { id: userId, username: user.username } }, {
-    "set-cookie": setAuthenticatedSession(userId, request)
+    "set-cookie": await setAuthenticatedSession(userId, request)
   });
 }
 
-function handleAccountData(request, response) {
+async function handleAccountData(request, response) {
   if (request.method !== "GET") {
     response.writeHead(405, { allow: "GET, PUT" });
     response.end();
     return;
   }
-  const user = getAuthenticatedUser(request);
+  const user = await getAuthenticatedUser(request);
   if (!user) {
     respond(response, 401, { error: "authentication_required" });
     return;
   }
-  const record = accountDatabase.prepare(`
-    SELECT readings_json, calibrations_json FROM account_data WHERE user_id = ?
-  `).get(user.id);
+  const record = (await query(`
+    SELECT readings_json, calibrations_json FROM hidro_account_data WHERE user_id = $1
+  `, [user.id])).rows[0];
   if (!record) {
     respond(response, 200, { readings: [], calibrations: [] });
     return;
@@ -681,12 +691,10 @@ const server = http.createServer((request, response) => {
     return;
   }
   if (requestUrl.pathname === "/api/account/data" && request.method === "GET") {
-    try {
-      handleAccountData(request, response);
-    } catch (error) {
+    handleAccountData(request, response).catch((error) => {
       console.error("Could not read account data.", error.message);
       if (!response.headersSent) respond(response, 500, { error: "account_service_error" });
-    }
+    });
     return;
   }
   if (requestUrl.pathname === "/api/health" && request.method === "GET") {
